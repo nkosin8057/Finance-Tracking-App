@@ -1,24 +1,26 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import SemiCircleProgress from "./assets/progress_bar/src";
+import { StyleSheet, Text, View, SafeAreaView } from "react-native";
+import { SemiCircleProgressDisplay } from "./src/components/ui/progress_displays/SemiCircleProgress";
+import { ProgressBar, Button } from "react-native-paper";
+import { ItemsProgressBar } from "./src/components/ui/progress_displays/ItemsProgressBar";
+import { MainSummaryDisplay } from "./src/components/ui/MainSummaryDisplay";
 
 export default function App() {
   return (
-    <SemiCircleProgress percentage={100} progressColor={"green"}>
-      <Text style={{ fontSize: 32, color: "green" }}>35%</Text>
-    </SemiCircleProgress>
+    <View style={styles.container}>
+      {/* <SemiCircleProgressDisplay spent={28000} total={30000} /> */}
+      {/* <ItemsProgressBar spent={25000} total={30000} /> */}
+      <MainSummaryDisplay spent={25000} total={30000} />
 
-    // <View style={styles.container}>
-    //   <Text>Open up App.js to start working on your app</Text>
-    //   <StatusBar style="auto" />
-    // </View>
+      <StatusBar style="auto" />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
   },
