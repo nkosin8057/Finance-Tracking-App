@@ -1,8 +1,8 @@
-import { Avatar, Button, Card, Title, Paragraph } from "react-native-paper";
+import { Button, Card, Title } from "react-native-paper";
 import { StyleSheet, View, Text } from "react-native";
 import { ItemsProgressBar } from "./progress_displays/ItemsProgressBar";
 
-export const MainSummaryDisplay = (props) => {
+export const ExpenseCard = (props) => {
   const progressPercentageText = props.spent / props.total;
   const progressPercentageDisplay =
     progressPercentageText < 1 ? progressPercentageText : 1;
@@ -30,9 +30,6 @@ export const MainSummaryDisplay = (props) => {
               <Text style={styles(progressColour).textSpent}>
                 Spent: R21 000.00
               </Text>
-            </View>
-            <View style={styles().fundRightContainer}>
-              {/* <Text style={styles().textLimit}>Limit: R31 000.00</Text> */}
             </View>
           </View>
         </View>
@@ -67,10 +64,6 @@ const styles = (colour) =>
       padding: 10,
       height: 120,
       width: "95%",
-      shadowColor: "#470000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.2,
-      elevation: 5,
     },
     cardViewContainer: {
       flexDirection: "row",
@@ -162,4 +155,3 @@ const styles = (colour) =>
       fontWeight: "bold",
     },
   });
-//<ItemsProgressBar spent={25000} total={30000} />
