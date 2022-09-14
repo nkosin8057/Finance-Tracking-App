@@ -1,20 +1,11 @@
-import { Text, View } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import { ProgressBar } from "react-native-paper";
-import { StyleSheet } from "react-native";
 
 export const ItemsProgressBar = (props) => {
-  const progressPercentageText = props.spent / props.total;
+  const progressPercentageText = props.ratio;
   const progressPercentageDisplay =
     progressPercentageText < 1 ? progressPercentageText : 1;
-  let progressColour = "#00cc33";
-
-  if (progressPercentageText > 0.8 && progressPercentageText < 1) {
-    progressColour = "#ECCD0E";
-  }
-
-  if (progressPercentageText >= 1) {
-    progressColour = "#CE1717";
-  }
+  const progressColour = props.colour;
 
   return (
     <View style={styles().container}>

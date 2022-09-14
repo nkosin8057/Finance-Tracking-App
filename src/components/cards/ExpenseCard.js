@@ -1,34 +1,58 @@
 import { Button, Card, Title } from "react-native-paper";
 import { StyleSheet, View, Text } from "react-native";
-import { ItemsProgressBar } from "./progress_displays/ItemsProgressBar";
+import { mockIncome } from "../ui/MockData";
+import { ItemsProgressBar } from "../ui/progress_displays/ItemsProgressBar";
 
 export const ExpenseCard = (props) => {
-  const progressPercentageText = props.spent / props.total;
+  const expense = +props.total;
+  const income = +mockIncome[0].total;
+  const limit = +props.limit;
+  const type = props.type;
+
+  const formatter = new Intl.NumberFormat("en-ZA", {
+    style: "currency",
+    currency: "ZAR",
+  });
+
+  //console.log(expense);
+  //console.log(mockIncome[0].total);
+
+  const contrib = ((expense / income) * 100).toFixed(1);
+
+  const progressPercentageText = expense / limit;
   const progressPercentageDisplay =
     progressPercentageText < 1 ? progressPercentageText : 1;
   let progressColour = "#00cc33";
 
-  if (progressPercentageText > 0.8 && progressPercentageText < 1) {
+  if (
+    progressPercentageText > 0.8 &&
+    progressPercentageText < 1 &&
+    type !== "single"
+  ) {
     progressColour = "#ECCD0E";
   }
 
-  if (progressPercentageText >= 1) {
+  if (progressPercentageText >= 1 && type !== "single") {
     progressColour = "#CE1717";
   }
+
   return (
     <Card style={styles().cardContainer}>
       <View style={styles().cardViewContainer}>
         <View style={styles().cardLeftContainer}>
           <View style={styles().cardTitleContainer}>
-            <Title style={styles().title}>Card Title</Title>
+            <Title style={styles().title}>{props.name}</Title>
           </View>
           <View style={styles().cardProgressContainer}>
-            <ItemsProgressBar spent={3100} total={30000} />
+            <ItemsProgressBar
+              colour={progressColour}
+              ratio={progressPercentageText}
+            />
           </View>
           <View style={styles().cardFundsContainer}>
             <View style={styles().fundLeftContainer}>
               <Text style={styles(progressColour).textSpent}>
-                Spent: R21 000.00
+                Spent: {formatter.format(expense)}
               </Text>
             </View>
           </View>
@@ -38,7 +62,7 @@ export const ExpenseCard = (props) => {
             <Text style={styles().textContribution}>Contribution:</Text>
           </View>
           <View style={styles().cardContributionContainer}>
-            <Text style={styles(progressColour).contribution}>24%</Text>
+            <Text style={styles(progressColour).contribution}>{contrib}%</Text>
           </View>
           <View style={styles().cardButtonContainer}>
             <Button
@@ -63,7 +87,10 @@ const styles = (colour) =>
     cardContainer: {
       padding: 10,
       height: 120,
-      width: "95%",
+      width: "100%",
+      marginBottom: 25,
+      elevation: 3,
+      backgroundColor: "transparent",
     },
     cardViewContainer: {
       flexDirection: "row",
@@ -123,10 +150,10 @@ const styles = (colour) =>
     },
     title: {
       fontWeight: "bold",
-      color: "#3666e0",
+      color: "white",
     },
     textSpent: {
-      fontSize: 13,
+      fontSize: 16,
       fontWeight: "bold",
       color: colour,
     },
@@ -137,7 +164,7 @@ const styles = (colour) =>
     textContribution: {
       fontSize: 13,
       fontWeight: "bold",
-      color: "#3666e0",
+      color: "white",
     },
     contribution: {
       fontSize: 26,
@@ -146,11 +173,11 @@ const styles = (colour) =>
     },
     buttonStyle: {
       borderWidth: 1,
-      borderColor: "#3666e0",
+      borderColor: "white",
       borderRadius: 15,
     },
     buttonLabel: {
-      color: "#3666e0",
+      color: "white",
       fontSize: 10,
       fontWeight: "bold",
     },

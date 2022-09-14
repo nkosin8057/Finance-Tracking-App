@@ -1,165 +1,184 @@
-import { Avatar, Button, Card, Title, Paragraph } from "react-native-paper";
-import { StyleSheet, View, Text } from "react-native";
-import { ItemsProgressBar } from "./progress_displays/ItemsProgressBar";
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  StatusBar,
+  FlatList,
+  ImageBackground,
+} from "react-native";
+import { ExpenseCard } from "../cards/ExpenseCard";
+import { mockExpenses, mockIncome } from "./MockData";
+import { TotalSummaryCard } from "../cards/TotalSummaryCard";
+import { CircularTextDisplay } from "../cards/CircularInfoDisplay";
+import { Title } from "react-native-paper";
+import { WheelPickerDisplay } from "./menus/WheelPicker";
+import { DateCard } from "../cards/DateCard";
 
-export const MainSummaryDisplay = (props) => {
-  const progressPercentageText = props.spent / props.total;
-  const progressPercentageDisplay =
-    progressPercentageText < 1 ? progressPercentageText : 1;
-  let progressColour = "#00cc33";
+const expenseItemsSummed = () => {
+  let summedExpenses = [];
+  let i = 0;
 
-  if (progressPercentageText > 0.8 && progressPercentageText < 1) {
-    progressColour = "#ECCD0E";
-  }
+  mockExpenses.map((expenseItem) => {
+    let exist = summedExpenses.findIndex((expense) => {
+      return expense.name === expenseItem.name;
+    });
 
-  if (progressPercentageText >= 1) {
-    progressColour = "#CE1717";
-  }
+    if (exist != -1) {
+      summedExpenses[exist].total += expenseItem.total;
+    } else {
+      let expObj = {
+        id: i,
+        name: expenseItem.name,
+        total: expenseItem.total,
+        limit: expenseItem.limit,
+        type: expenseItem.type,
+      };
+
+      summedExpenses.push(expObj);
+      i++;
+    }
+  });
+
+  return summedExpenses;
+};
+
+const incomeDataSummed = () => {
+  return mockIncome[0].total;
+};
+
+const variableExpensesSummed = () => {
+  let sum = 0;
+
+  sum = mockExpenses.reduce((prev, curr) => {
+    if (curr.type === "multiple") {
+      return prev + curr.total;
+    } else {
+      return prev;
+    }
+  }, 0);
+
+  return sum;
+};
+
+const fixedExpensesSummed = () => {
+  let sum = 0;
+
+  sum = mockExpenses.reduce((prev, curr) => {
+    if (curr.type === "single") {
+      return prev + curr.total;
+    } else {
+      return prev;
+    }
+  }, 0);
+
+  return sum;
+};
+
+export const MainSummaryDisplay = () => {
+  const expenseData = expenseItemsSummed();
+  const income = incomeDataSummed();
+  const fixedExpenses = fixedExpensesSummed();
+  const variableExpenses = variableExpensesSummed();
+
+  const formatter = new Intl.NumberFormat("en-ZA", {
+    style: "currency",
+    currency: "ZAR",
+  });
+
+  const renderItem = ({ item }) => (
+    <ExpenseCard
+      name={item.name}
+      total={item.total}
+      limit={item.limit}
+      type={item.type}
+    />
+  );
+
+  const image = require("../../../assets/images/money_plant2.jpg");
   return (
-    <Card style={styles().cardContainer}>
-      <View style={styles().cardViewContainer}>
-        <View style={styles().cardLeftContainer}>
-          <View style={styles().cardTitleContainer}>
-            <Title style={styles().title}>Card Title</Title>
-          </View>
-          <View style={styles().cardProgressContainer}>
-            <ItemsProgressBar spent={3100} total={30000} />
-          </View>
-          <View style={styles().cardFundsContainer}>
-            <View style={styles().fundLeftContainer}>
-              <Text style={styles(progressColour).textSpent}>
-                Spent: R21 000.00
-              </Text>
-            </View>
-            <View style={styles().fundRightContainer}>
-              {/* <Text style={styles().textLimit}>Limit: R31 000.00</Text> */}
-            </View>
-          </View>
+    <SafeAreaView style={styles.container}>
+      <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+        <View style={styles.dateDisplayContainer}>
+          <DateCard />
         </View>
-        <View style={styles().cardRightContainer}>
-          <View style={styles().cardCaptionContainer}>
-            <Text style={styles().textContribution}>Contribution:</Text>
-          </View>
-          <View style={styles().cardContributionContainer}>
-            <Text style={styles(progressColour).contribution}>24%</Text>
-          </View>
-          <View style={styles().cardButtonContainer}>
-            <Button
-              labelStyle={styles().buttonLabel}
-              style={styles().buttonStyle}
-              icon="binoculars"
-              mode="outlined"
-              compact="true"
-              onPress={() => console.log("Pressed")}
-            >
-              View
-            </Button>
-          </View>
+        <View style={styles.circularDisplayContainer}>
+          <CircularTextDisplay
+            title={"Income"}
+            value={formatter.format(income)}
+            textColour={"#FFFFFF"}
+          />
+          <CircularTextDisplay
+            title={"Fixed Expenses"}
+            value={formatter.format(fixedExpenses)}
+            textColour={"#FFFFFF"}
+          />
+          <CircularTextDisplay
+            title={"Variable Expenses"}
+            value={formatter.format(variableExpenses)}
+            textColour={"#FFFFFF"}
+          />
         </View>
-      </View>
-    </Card>
+        <View style={styles.totalSummaryContainer}>
+          <TotalSummaryCard spent={21000} total={31000} />
+        </View>
+        <View style={styles.listContainer}>
+          <Title style={styles.titleText}>EXPENSES</Title>
+          <FlatList
+            data={expenseData}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ padding: 5 }}
+          />
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
-const styles = (colour) =>
-  StyleSheet.create({
-    cardContainer: {
-      padding: 10,
-      height: 120,
-      width: "95%",
-      shadowColor: "#470000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.2,
-      elevation: 5,
-    },
-    cardViewContainer: {
-      flexDirection: "row",
-      flex: 1,
-    },
-    cardLeftContainer: {
-      flex: 0.7,
-      height: "100%",
-    },
-    cardRightContainer: {
-      flex: 0.3,
-      height: "100%",
-    },
-    cardTitleContainer: {
-      flex: 1,
-      width: "100%",
-      alignItems: "flex-start",
-      justifyContent: "flex-start",
-    },
-    cardProgressContainer: {
-      flex: 1,
-      width: "100%",
-      alignItems: "flex-start",
-      justifyContent: "flex-start",
-    },
-    cardFundsContainer: {
-      flexDirection: "row",
-      flex: 1,
-      width: "100%",
-    },
-    fundLeftContainer: {
-      flex: 0.5,
-      height: "100%",
-      alignItems: "flex-start",
-      justifyContent: "center",
-    },
-    fundRightContainer: {
-      flex: 0.5,
-      height: "100%",
-      alignItems: "flex-start",
-      justifyContent: "center",
-    },
-    cardCaptionContainer: {
-      flex: 0.2,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    cardContributionContainer: {
-      flex: 0.4,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    cardButtonContainer: {
-      flex: 0.4,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    title: {
-      fontWeight: "bold",
-      color: "#3666e0",
-    },
-    textSpent: {
-      fontSize: 13,
-      fontWeight: "bold",
-      color: colour,
-    },
-    textLimit: {
-      fontSize: 13,
-      fontWeight: "bold",
-    },
-    textContribution: {
-      fontSize: 13,
-      fontWeight: "bold",
-      color: "#3666e0",
-    },
-    contribution: {
-      fontSize: 26,
-      fontWeight: "bold",
-      color: colour,
-    },
-    buttonStyle: {
-      borderWidth: 1,
-      borderColor: "#3666e0",
-      borderRadius: 15,
-    },
-    buttonLabel: {
-      color: "#3666e0",
-      fontSize: 10,
-      fontWeight: "bold",
-    },
-  });
-//<ItemsProgressBar spent={25000} total={30000} />
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    //marginTop: StatusBar.currentHeight,
+    // flexDirection: "column",
+    // flexDirection: "column",
+    // alignItems: "center",
+    // justifyContent: "center",
+    // paddingLeft: 10,
+    width: "100%",
+  },
+  image: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  dateDisplayContainer: {
+    flex: 0.05,
+    marginTop: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  circularDisplayContainer: {
+    flexDirection: "row",
+    flex: 0.2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  totalSummaryContainer: {
+    width: "100%",
+    flex: 0.2,
+    marginBottom: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  listContainer: {
+    width: "100%",
+    flex: 0.55,
+  },
+  titleText: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+});
