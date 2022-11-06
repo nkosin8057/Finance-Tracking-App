@@ -8,7 +8,7 @@ import {
   Image,
 } from "react-native-svg";
 
-export const CircularTextDisplay = (props) => {
+export const InfoCircularCard = (props) => {
   const itemTitle = props.title;
   const itemValue = props.value;
 
@@ -31,16 +31,6 @@ export const CircularTextDisplay = (props) => {
         <TextPath href="#path" startOffset="50%">
           {itemTitle}
         </TextPath>
-        {/* <Image
-          x="10"
-          y="10"
-          width="100%"
-          height="100%"
-          preserveAspectRatio="xMidYMid slice"
-          opacity="1"
-          href={require("../../../assets/images/money_jar.jpg")}
-          clipPath="url(#clip)"
-        /> */}
       </Text>
       <Text
         x="70"

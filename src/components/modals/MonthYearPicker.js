@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
-import { View, Text, Modal, Alert, StyleSheet, Pressable } from "react-native";
-import MonthPicker from "react-native-month-year-picker";
+import { View, Modal, StyleSheet } from "react-native";
 import { WheelPickerDisplay } from "./WheelPicker";
 import { Button } from "react-native-paper";
 import { useContext } from "react";
-import { MonthContext } from "../../../store/MonthProvider";
+import { MonthContext } from "../../store/MonthProvider";
 
 const months = [
   "Jan",
@@ -23,9 +21,6 @@ const months = [
 
 export const MonthYearPicker = (props) => {
   const monthCtx = useContext(MonthContext);
-  useEffect(() => {
-    monthCtx.setMonth(new Date(2022, 9));
-  }, []);
 
   let year = [];
   const yearDiff =
@@ -38,21 +33,15 @@ export const MonthYearPicker = (props) => {
   let monthIndex = 0;
   const getMonthHandler = (index) => {
     monthIndex = index;
-    //console.log(index);
   };
 
   let yearIndex = 0;
   const getYearHandler = (index) => {
     yearIndex = index;
-    //console.log(index);
   };
 
   const onSubmitHandler = () => {
-    // console.log(yearIndex);
-    // console.log(year[yearIndex]);
-    console.log(monthIndex);
     monthCtx.setMonth(new Date(year[yearIndex], monthIndex));
-    console.log(monthCtx.monthDate);
     props.modalClose();
   };
 
@@ -66,19 +55,23 @@ export const MonthYearPicker = (props) => {
         animationType="fade"
         transparent={true}
         visible={props.modalShow}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
+        // onRequestClose={() => {
+        //   setModalVisible(!modalVisible);
+        // }}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.rowFlex}>
               <WheelPickerDisplay
+                index={monthCtx.monthDate.getMonth()}
                 data={months}
                 getSelectedValue={getMonthHandler}
               />
               <View style={styles.wheelPickerComp}>
                 <WheelPickerDisplay
+                  index={year.findIndex((yr) => {
+                    return yr === monthCtx.monthDate.getFullYear();
+                  })}
                   data={year}
                   getSelectedValue={getYearHandler}
                 />

@@ -1,11 +1,11 @@
 import { Button, Card, Title } from "react-native-paper";
 import { StyleSheet, View, Text } from "react-native";
-import { mockIncome } from "../ui/MockData";
-import { ItemsProgressBar } from "../ui/progress_displays/ItemsProgressBar";
+import { ItemsProgressBar } from "../progress_displays/ItemsProgressBar";
 
 export const ExpenseCard = (props) => {
-  const expense = +props.total;
-  const income = +mockIncome[0].total;
+  const name = props.name;
+  const expense = +props.amount;
+  const income = props.income;
   const limit = +props.limit;
   const type = props.type;
 
@@ -13,9 +13,6 @@ export const ExpenseCard = (props) => {
     style: "currency",
     currency: "ZAR",
   });
-
-  //console.log(expense);
-  //console.log(mockIncome[0].total);
 
   const contrib = ((expense / income) * 100).toFixed(1);
 
@@ -27,14 +24,18 @@ export const ExpenseCard = (props) => {
   if (
     progressPercentageText > 0.8 &&
     progressPercentageText < 1 &&
-    type !== "single"
+    type !== "exp-fixed"
   ) {
     progressColour = "#ECCD0E";
   }
 
-  if (progressPercentageText >= 1 && type !== "single") {
+  if (progressPercentageText >= 1 && type !== "exp-fixed") {
     progressColour = "#CE1717";
   }
+
+  const onButtonSelectedHandler = (selection) => {
+    props.onButtonSelected(selection);
+  };
 
   return (
     <Card style={styles().cardContainer}>
@@ -71,7 +72,7 @@ export const ExpenseCard = (props) => {
               icon="binoculars"
               mode="outlined"
               compact="true"
-              onPress={() => console.log("Pressed")}
+              onPress={() => onButtonSelectedHandler(name)}
             >
               View
             </Button>

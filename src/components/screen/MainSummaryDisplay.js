@@ -7,79 +7,29 @@ import {
   FlatList,
   ImageBackground,
 } from "react-native";
-import { ExpenseCard } from "../cards/ExpenseCard";
+import { ExpenseCard } from "../elementaries/cards/ExpenseCard";
 import { mockExpenses, mockIncome } from "./MockData";
-import { TotalSummaryCard } from "../cards/TotalSummaryCard";
-import { CircularTextDisplay } from "../cards/CircularInfoDisplay";
+import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
+import { InfoCircularCard } from "../elementaries/cards/InfoCircularCard";
 import { Title } from "react-native-paper";
-import { WheelPickerDisplay } from "./menus/WheelPicker";
-import { DateCard } from "../cards/DateCard";
+import { WheelPickerDisplay } from "../modals/WheelPicker";
+import { DateMenu } from "../elementaries/menus/DateMenu";
+import { useContext, useEffect, useState } from "react";
+import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
+import { MonthContext } from "../../store/MonthProvider";
 
-const expenseItemsSummed = () => {
-  let summedExpenses = [];
-  let i = 0;
+export const MainSummaryDisplay = ({ navigation }) => {
+  const incExpCtx = useContext(IncomeExpensesDataContext);
+  const monthCtx = useContext(MonthContext);
+  const [name, setName] = useState("");
 
-  mockExpenses.map((expenseItem) => {
-    let exist = summedExpenses.findIndex((expense) => {
-      return expense.name === expenseItem.name;
-    });
+  useEffect(() => {
+    incExpCtx.setGetByMonth(monthCtx.monthDate);
+  }, [monthCtx.monthDate]);
 
-    if (exist != -1) {
-      summedExpenses[exist].total += expenseItem.total;
-    } else {
-      let expObj = {
-        id: i,
-        name: expenseItem.name,
-        total: expenseItem.total,
-        limit: expenseItem.limit,
-        type: expenseItem.type,
-      };
-
-      summedExpenses.push(expObj);
-      i++;
-    }
-  });
-
-  return summedExpenses;
-};
-
-const incomeDataSummed = () => {
-  return mockIncome[0].total;
-};
-
-const variableExpensesSummed = () => {
-  let sum = 0;
-
-  sum = mockExpenses.reduce((prev, curr) => {
-    if (curr.type === "multiple") {
-      return prev + curr.total;
-    } else {
-      return prev;
-    }
-  }, 0);
-
-  return sum;
-};
-
-const fixedExpensesSummed = () => {
-  let sum = 0;
-
-  sum = mockExpenses.reduce((prev, curr) => {
-    if (curr.type === "single") {
-      return prev + curr.total;
-    } else {
-      return prev;
-    }
-  }, 0);
-
-  return sum;
-};
-
-export const MainSummaryDisplay = () => {
-  const expenseData = expenseItemsSummed();
-  const income = incomeDataSummed();
-  const fixedExpenses = fixedExpensesSummed();
-  const variableExpenses = variableExpensesSummed();
+  useEffect(() => {
+    incExpCtx.setGetItemByMonth(name, monthCtx.monthDate);
+  }, [name]);
 
   const formatter = new Intl.NumberFormat("en-ZA", {
     style: "currency",
@@ -88,44 +38,57 @@ export const MainSummaryDisplay = () => {
 
   const renderItem = ({ item }) => (
     <ExpenseCard
-      name={item.name}
-      total={item.total}
+      name={item.item}
+      amount={item.amount}
       limit={item.limit}
       type={item.type}
+      income={incExpCtx.getIncomeByMonth}
+      onButtonSelected={onButtonSelected}
     />
   );
+
+  const onButtonSelected = (selection) => {
+    setName(selection);
+    navigation.navigate("Single-Item");
+  };
+
+  //console.log(incExpCtx.getByMonthSummed);
+  console.log(incExpCtx.getItemByMonth);
 
   const image = require("../../../assets/images/money_plant2.jpg");
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
         <View style={styles.dateDisplayContainer}>
-          <DateCard />
+          <DateMenu />
         </View>
         <View style={styles.circularDisplayContainer}>
-          <CircularTextDisplay
+          <InfoCircularCard
             title={"Income"}
-            value={formatter.format(income)}
+            value={formatter.format(incExpCtx.getIncomeByMonth)}
             textColour={"#FFFFFF"}
           />
-          <CircularTextDisplay
+          <InfoCircularCard
             title={"Fixed Expenses"}
-            value={formatter.format(fixedExpenses)}
+            value={formatter.format(incExpCtx.getFixedTotalMonth)}
             textColour={"#FFFFFF"}
           />
-          <CircularTextDisplay
+          <InfoCircularCard
             title={"Variable Expenses"}
-            value={formatter.format(variableExpenses)}
+            value={formatter.format(incExpCtx.getVariableTotalMonth)}
             textColour={"#FFFFFF"}
           />
         </View>
         <View style={styles.totalSummaryContainer}>
-          <TotalSummaryCard spent={21000} total={31000} />
+          <TotalSummaryCard
+            spent={incExpCtx.getTotalByMonth}
+            total={incExpCtx.getIncomeByMonth}
+          />
         </View>
         <View style={styles.listContainer}>
           <Title style={styles.titleText}>EXPENSES</Title>
           <FlatList
-            data={expenseData}
+            data={incExpCtx.getByMonthSummed}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ padding: 5 }}
@@ -153,7 +116,7 @@ const styles = StyleSheet.create({
   },
   dateDisplayContainer: {
     flex: 0.05,
-    marginTop: 5,
+    marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
   },

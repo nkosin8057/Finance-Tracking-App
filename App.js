@@ -1,30 +1,33 @@
+import * as React from "react";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, SafeAreaView, StatusBar } from "react-native";
-import { SemiCircleProgressDisplay } from "./src/components/ui/progress_displays/SemiCircleProgress";
-import { ProgressBar, Button } from "react-native-paper";
-import { ItemsProgressBar } from "./src/components/ui/progress_displays/ItemsProgressBar";
-import { MainSummaryDisplay } from "./src/components/ui/MainSummaryDisplay";
-import { mockData } from "./src/components/ui/MockData";
-import { MonthYearPicker } from "./src/components/ui/menus/MonthYearPicker";
+import { StyleSheet, View, StatusBar, Text } from "react-native";
+import { MainSummaryDisplay } from "./src/components/screen/MainSummaryDisplay";
 import MonthProvider from "./src/store/MonthProvider";
+import IncomeExpensesDataProvider from "./src/store/IncomeExpensesDataProvider";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SingleItemDisplay } from "./src/components/screen/SingleItemDisplay";
 
 export default function App() {
-  const maxDate = new Date(
-    Math.max(
-      ...mockData.map((element) => {
-        return new Date(element.date);
-      })
-    )
-  );
+  const Stack = createNativeStackNavigator();
 
   return (
     <>
-      <View style={styles.container}>
-        <MonthProvider>
-          {/* <MonthYearPicker /> */}
-          <MainSummaryDisplay />
-        </MonthProvider>
-      </View>
+      <MonthProvider>
+        <IncomeExpensesDataProvider>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName="Summary"
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="Summary" component={MainSummaryDisplay} />
+              <Stack.Screen name="Single-Item" component={SingleItemDisplay} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </IncomeExpensesDataProvider>
+      </MonthProvider>
       <ExpoStatusBar style="auto" />
     </>
   );

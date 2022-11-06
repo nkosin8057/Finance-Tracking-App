@@ -1,6 +1,6 @@
 import React from "react";
 import { useReducer } from "react";
-import { mockData } from "../components/ui/MockData";
+import { mockData } from "../components/screen/MockData";
 
 const maxDate = new Date(
   Math.max(
@@ -33,7 +33,6 @@ const defaultState = {
 
 const monthReducer = (state, action) => {
   if (action.type === "SET_MONTH") {
-    console.log(action.month);
     return {
       monthDate: action.month,
       endMonth: maxDate,
@@ -53,10 +52,6 @@ const MonthProvider = (props) => {
   const setMonthHandler = (month) => {
     dispatchMonthAction({ type: "SET_MONTH", month: month });
   };
-
-  //   const setYearHandler = (year) => {
-  //     dispatchMonthAction({ type: "SET_MONTH", year: year });
-  //   };
 
   const monthCotext = {
     monthDate: monthState.monthDate,

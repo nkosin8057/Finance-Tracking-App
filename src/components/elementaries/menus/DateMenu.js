@@ -1,12 +1,14 @@
 import { Button, IconButton } from "react-native-paper";
 import { Text, StyleSheet, View } from "react-native";
-import { MonthYearPicker } from "../ui/menus/MonthYearPicker";
+import { MonthYearPicker } from "../../modals/MonthYearPicker";
 import { useState, useContext } from "react";
-import { MonthContext } from "../../store/MonthProvider";
+import { MonthContext } from "../../../store/MonthProvider";
+import { IncomeExpensesDataContext } from "../../../store/IncomeExpensesDataProvider";
 
-export const DateCard = () => {
+export const DateMenu = () => {
   const [showModal, setShowModal] = useState(false);
   const monthCtx = useContext(MonthContext);
+  const incExpCtx = useContext(IncomeExpensesDataContext);
   const monthName = monthCtx.monthDate.toLocaleString("default", {
     month: "long",
   });
@@ -14,8 +16,8 @@ export const DateCard = () => {
 
   const modalCloseHandler = () => {
     setShowModal(false);
-    //console.log("called");
   };
+
   return (
     <View style={styles.cardContainer}>
       <View style={styles.rowFlex}>

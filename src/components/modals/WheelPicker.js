@@ -3,8 +3,8 @@ import WheelPicker from "react-native-wheely";
 import { StyleSheet } from "react-native";
 
 export const WheelPickerDisplay = (props) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
+  const [selectedIndex, setSelectedIndex] = useState(+props.index);
+  console.log(props.index);
   const onChangeHandler = (index) => {
     setSelectedIndex(index);
     props.getSelectedValue(index);

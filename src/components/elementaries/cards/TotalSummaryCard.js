@@ -1,6 +1,6 @@
 import { Card } from "react-native-paper";
 import { View, StyleSheet, Text } from "react-native";
-import { SemiCircleProgressDisplay } from "../ui/progress_displays/SemiCircleProgress";
+import { SemiCircleProgressDisplay } from "../progress_displays/SemiCircleProgress";
 
 export const TotalSummaryCard = (props) => {
   const profitLoss = +props.total - +props.spent;
