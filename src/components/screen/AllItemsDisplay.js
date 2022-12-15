@@ -1,6 +1,6 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { SingleItemDisplayMonth } from "./SingleItemDisplayMonth";
-import { SingleItemDisplayYear } from "./SingleItemDisplayYear";
+import { AllItemDisplayMonth } from "./AllItemsDisplayMonth";
+import { AllItemsDisplayYear } from "./AllItemsDisplayYear";
 import {
   StyleSheet,
   ImageBackground,
@@ -10,7 +10,7 @@ import {
 
 const Tab = createMaterialTopTabNavigator();
 
-export const SingleItemDisplay = () => {
+export const AllItemsDisplay = () => {
   const image = require("../../../assets/images/money_jar.jpg");
   return (
     <SafeAreaView style={styles.container}>
@@ -26,8 +26,8 @@ export const SingleItemDisplay = () => {
             },
           }}
         >
-          <Tab.Screen name="Month" component={SingleItemDisplayMonth} />
-          <Tab.Screen name="Year" component={SingleItemDisplayYear} />
+          <Tab.Screen name="Month" component={AllItemDisplayMonth} />
+          <Tab.Screen name="Year" component={AllItemsDisplayYear} />
         </Tab.Navigator>
       </ImageBackground>
     </SafeAreaView>

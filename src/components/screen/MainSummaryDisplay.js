@@ -17,6 +17,7 @@ import { DateMenu } from "../elementaries/menus/DateMenu";
 import { useContext, useEffect, useState } from "react";
 import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
 import { MonthContext } from "../../store/MonthProvider";
+import { BottomNavigationDisplay } from "./BottomNavigationDisplay";
 
 export const MainSummaryDisplay = ({ navigation }) => {
   const incExpCtx = useContext(IncomeExpensesDataContext);
@@ -28,7 +29,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
   }, [monthCtx.monthDate]);
 
   useEffect(() => {
-    incExpCtx.setGetItemByMonth(name, monthCtx.monthDate);
+    incExpCtx.setGetSingleItem(name, monthCtx.monthDate);
   }, [name]);
 
   const formatter = new Intl.NumberFormat("en-ZA", {
@@ -49,15 +50,12 @@ export const MainSummaryDisplay = ({ navigation }) => {
 
   const onButtonSelected = (selection) => {
     setName(selection);
-    navigation.navigate("Single-Item");
+    navigation.navigate("SingleItem");
   };
-
-  //console.log(incExpCtx.getByMonthSummed);
-  console.log(incExpCtx.getItemByMonth);
 
   const image = require("../../../assets/images/money_plant2.jpg");
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
         <View style={styles.dateDisplayContainer}>
           <DateMenu />
@@ -94,8 +92,9 @@ export const MainSummaryDisplay = ({ navigation }) => {
             contentContainerStyle={{ padding: 5 }}
           />
         </View>
+        {/* <BottomNavigationDisplay /> */}
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 };
 

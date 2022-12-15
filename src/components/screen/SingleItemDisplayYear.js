@@ -20,7 +20,7 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-export const Test = () => {
+export const SingleItemDisplayYear = () => {
   const monthCtx = useContext(MonthContext);
   const incExpCtx = useContext(IncomeExpensesDataContext);
   let expenses = [];
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   titleContainer: {
-    flex: 0.1,
+    flex: 0.05,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 2,
     borderColor: "white",
-    backgroundColor: "black",
+    backgroundColor: "silver",
     opacity: 0.7,
   },
   text: {
@@ -190,17 +190,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     alignSelf: "center",
-    paddingTop: 40,
-    paddingBottom: 10,
+    paddingTop: 5,
+    paddingBottom: 5,
     color: "white",
   },
   lineBarChart: {
-    flex: 0.4,
+    flex: 0.425,
     justifyContent: "center",
     alignItems: "center",
   },
   barCandlehart: {
-    flex: 0.4,
+    flex: 0.425,
     justifyContent: "center",
     alignItems: "center",
   },

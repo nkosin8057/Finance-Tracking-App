@@ -14,19 +14,60 @@ const expenseItemsSummed = (expenseData) => {
     if (exist != -1) {
       summedExpenses[exist].amount += expenseItem.amount;
     } else {
+      const d = new Date(expenseItem.date);
+      const dt = new Date(d.getFullYear(), d.getMonth(), 1);
       let expObj = {
         id: i,
         item: expenseItem.item,
         amount: expenseItem.amount,
         limit: expenseItem.limit,
         type: expenseItem.type,
-        //date: expenseItem.date,
+        date: dt,
       };
 
       summedExpenses.push(expObj);
       i++;
     }
   });
+  summedExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+  return summedExpenses;
+};
+
+const SingleExpenseItemsSummed = (expenseData) => {
+  let summedExpenses = [];
+  let i = 0;
+
+  expenseData.map((expenseItem) => {
+    const d = new Date(expenseItem.date);
+
+    let exist = summedExpenses.findIndex((expense) => {
+      const dt = new Date(expense.date);
+      //console.log(dt);
+      return (
+        new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() ===
+        new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+      );
+    });
+
+    if (exist != -1) {
+      summedExpenses[exist].amount += expenseItem.amount;
+    } else {
+      const dt = new Date(d.getFullYear(), d.getMonth(), 1);
+      let expObj = {
+        id: i,
+        item: expenseItem.item,
+        amount: expenseItem.amount,
+        limit: expenseItem.limit,
+        type: expenseItem.type,
+        date: dt,
+      };
+
+      summedExpenses.push(expObj);
+      i++;
+    }
+  });
+
+  summedExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return summedExpenses;
 };
@@ -44,8 +85,13 @@ const itemTotal = (items) => {
 export const IncomeExpensesDataContext = React.createContext({
   getByMonthSummed: [],
   getByMonthUnsummed: [],
+  getByYearSummed: [],
+  getByYearUnsummed: [],
   getItemByMonth: [],
-  getByName: [],
+  getItemByYearSummed: [],
+  getItemByYearUnsummed: [],
+  getItemByYearTotal: 0,
+  getByYearTotal: 0,
   getTotalByMonth: 0,
   getTotalByName: 0,
   getIncomeAll: 0,
@@ -53,17 +99,21 @@ export const IncomeExpensesDataContext = React.createContext({
   getFixedTotalMonth: 0,
   getVariableTotalMonth: 0,
   setGetByMonth: (month) => {},
-  setGetByName: (name) => {},
   setGetTotalByMonth: (month) => {},
   setGetTotalByName: (name) => {},
-  setGetItemByMonth: (name, month) => {},
+  setGetSingleItem: (name, month) => {},
 });
 
 const defaultState = {
   getByMonthSummed: [],
   getByMonthUnsummed: [],
+  getByYearSummed: [],
+  getByYearUnsummed: [],
   getItemByMonth: [],
-  getByName: [],
+  getItemByYearSummed: [],
+  getItemByYearUnsummed: [],
+  getItemByYearTotal: 0,
+  getByYearTotal: 0,
   getTotalByMonth: 0,
   getTotalByName: 0,
   getIncomeByMonth: 0,
@@ -109,11 +159,39 @@ const incomeExpensesDataReducer = (state, action) => {
       );
     });
 
+    const yearExpenses = mockData.filter((expenses) => {
+      const expDate = new Date(expenses.date);
+      const endDate = new Date(
+        action.month.getFullYear(),
+        action.month.getMonth() + 1,
+        1
+      );
+      const startDate = new Date(
+        action.month.getFullYear(),
+        action.month.getMonth() - 11,
+        1
+      );
+
+      return (
+        expDate >= startDate &&
+        expDate < endDate &&
+        expenses.item === action.name &&
+        (expenses.type === "exp-variable" || expenses.type === "exp-fixed")
+      );
+    });
+
+    yearExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+
     return {
       getByMonthSummed: expenseItemsSummed(nuExpenses),
       getByMonthUnsummed: nuExpenses,
+      getByYearSummed: expenseItemsSummed(yearExpenses),
+      getByYearUnsummed: yearExpenses,
       getItemByMonth: state.getItemByMonth,
-      getByName: state.getByName,
+      getItemByYearSummed: state.getItemByYearSummed,
+      getItemByYearUnsummed: state.getItemByYearUnsummed,
+      getItemByYearTotal: state.getItemByYearTotal,
+      getByYearTotal: itemTotal(yearExpenses),
       getTotalByMonth: itemTotal(nuExpenses),
       getTotalByName: state.getTotalByName,
       getIncomeAll: state.getIncomeAll,
@@ -124,7 +202,7 @@ const incomeExpensesDataReducer = (state, action) => {
   }
 
   if (action.type === "SET_NAME_MONTH") {
-    const nuExpenses = mockData.filter((expenses) => {
+    const monthExpenses = mockData.filter((expenses) => {
       const expDate = new Date(expenses.date);
       return (
         expDate.getMonth() === action.month.getMonth() &&
@@ -134,11 +212,37 @@ const incomeExpensesDataReducer = (state, action) => {
       );
     });
 
+    monthExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const yearExpenses = mockData.filter((expenses) => {
+      const expDate = new Date(expenses.date);
+      const endDate = new Date(
+        action.month.getFullYear(),
+        action.month.getMonth() + 1,
+        1
+      );
+      const startDate = new Date(
+        action.month.getFullYear(),
+        action.month.getMonth() - 11,
+        1
+      );
+
+      return (
+        expDate >= startDate &&
+        expDate < endDate &&
+        expenses.item === action.name &&
+        (expenses.type === "exp-variable" || expenses.type === "exp-fixed")
+      );
+    });
+
     return {
       getByMonthSummed: state.getByMonthSummed,
       getByMonthUnsummed: state.getByMonthUnsummed,
-      getItemByMonth: nuExpenses,
-      getByName: state.getByName,
+      getItemByMonth: monthExpenses,
+      getItemByYearSummed: SingleExpenseItemsSummed(yearExpenses),
+      getItemByYearTotal: itemTotal(yearExpenses),
+      getByYearTotal: state.getByYearTotal,
+      getItemByYearUnsummed: yearExpenses,
       getTotalByMonth: state.getTotalByName,
       getTotalByName: state.getTotalByName,
       getIncomeAll: state.getIncomeAll,
@@ -160,20 +264,23 @@ const IncomeExpensesDataProvider = (props) => {
   const setGetByMonthHandler = (month) => {
     dispatchIncExpAction({ type: "SET_MONTH", month: month });
   };
-  const setGetByNameHandler = (name) => {
-    dispatchIncExpAction({ type: "SET_NAME", name: name });
-  };
   const setGetTotalByNameHandler = (name) => {
     dispatchIncExpAction({ type: "SET_NAME_TOTAL", name: name });
   };
-  const setGetItemByMonthHandler = (name, month) => {
+  const setSingleGetItemHandler = (name, month) => {
     dispatchIncExpAction({ type: "SET_NAME_MONTH", name: name, month: month });
   };
 
   const incExpContext = {
     getByMonthSummed: incExpState.getByMonthSummed,
     getByMonthUnsummed: incExpState.getByMonthUnsummed,
+    getByYearSummed: incExpState.getByYearSummed,
+    getByYearUnsummed: incExpState.getByYearUnsummed,
     getItemByMonth: incExpState.getItemByMonth,
+    getItemByYearUnsummed: incExpState.getItemByYearUnsummed,
+    getItemByYearSummed: incExpState.getItemByYearSummed,
+    getItemByYearTotal: incExpState.getItemByYearTotal,
+    getByYearTotal: incExpState.getByYearTotal,
     getByName: incExpState.getByName,
     getTotalByMonth: incExpState.getTotalByMonth,
     getTotalByName: incExpState.getTotalByName,
@@ -182,9 +289,8 @@ const IncomeExpensesDataProvider = (props) => {
     getFixedTotalMonth: incExpState.getFixedTotalMonth,
     getVariableTotalMonth: incExpState.getVariableTotalMonth,
     setGetByMonth: setGetByMonthHandler,
-    setGetByName: setGetByNameHandler,
     setGetTotalByName: setGetTotalByNameHandler,
-    setGetItemByMonth: setGetItemByMonthHandler,
+    setGetSingleItem: setSingleGetItemHandler,
   };
 
   return (

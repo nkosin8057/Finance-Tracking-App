@@ -46,7 +46,8 @@ const styles = StyleSheet.create({
     borderColor: "white",
     marginBottom: 25,
     elevation: 3,
-    backgroundColor: "transparent",
+    backgroundColor: "black",
+    opacity: 0.7,
   },
   cardViewContainer: {
     flexDirection: "row",
@@ -88,8 +89,10 @@ const styles = StyleSheet.create({
   descriptionContainer: {
     flex: 0.7,
     height: "100%",
-    borderColor: "white",
-    borderWidth: 2,
+    // borderColor: "white",
+    // borderWidth: 2,
+    // backgroundColor: "silver",
+    // opacity: 0.7,
   },
   description: {
     fontSize: 13,

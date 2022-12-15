@@ -20,14 +20,30 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-export const Test = () => {
+const findBudget = (data) => {
+  let unique = [];
+  data.forEach((element) => {
+    if (!unique.includes(element.item)) {
+      unique.push(element);
+    }
+  });
+
+  const budget = items.reduce((prev, curr) => {
+    return prev + curr.limit;
+  }, 0);
+
+  return budget;
+};
+
+export const AllItemsDisplayYear = () => {
   const monthCtx = useContext(MonthContext);
   const incExpCtx = useContext(IncomeExpensesDataContext);
   let expenses = [];
-  expenses = incExpCtx.getItemByYearSummed;
+  expenses = incExpCtx.getByYearSummed;
 
   let xVals = [];
   let yVals = [];
+  const summedBudget = findBudget(expenses);
   let budget = [];
   const months = [
     "Jan",
@@ -48,14 +64,10 @@ export const Test = () => {
     const yr = element.date.getFullYear().toString().substr(-2);
     xVals.push(`${mnth} ${yr}`);
     yVals.push(element.amount);
-    budget.push(element.limit);
+    budget.push(summedBudget);
   });
 
   const barValues1 = xyData(xVals, yVals);
-
-  // let cumSum = [];
-  // yVals.reduce((prev, curr, i) => (cumSum[i] = prev + curr), 0);
-  // const cumulative = xyData(xVals, cumSum);
 
   const budgetValues = xyData(xVals, budget);
 
@@ -64,8 +76,7 @@ export const Test = () => {
 
   const showValues = xVals;
 
-  const csData = incExpCtx.getItemByYearUnsummed.map((element) => {
-    //console.log(element);
+  const csData = incExpCtx.getByYearUnsummed.map((element) => {
     return {
       date: new Date(element.date),
       amount: element.amount,
@@ -81,7 +92,7 @@ export const Test = () => {
   });
   const csMax = Math.max(...candleData.map((mValue) => mValue.y));
   const csMin = Math.min(...candleData.map((mValue) => mValue.y));
-  console.log(incExpCtx.getItemByYearTotal);
+
   const lossProfit = candleData[candleData.length - 1].y;
 
   let lossProfitText = "Profit";
@@ -106,7 +117,7 @@ export const Test = () => {
             </View>
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
-                Total Spent: {formatter.format(incExpCtx.getItemByYearTotal)}
+                Total Spent: {formatter.format(incExpCtx.getByYearTotal)}
               </Text>
               {
                 <Text
@@ -167,7 +178,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   titleContainer: {
-    flex: 0.1,
+    flex: 0.05,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -178,7 +189,7 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 2,
     borderColor: "white",
-    backgroundColor: "black",
+    backgroundColor: "silver",
     opacity: 0.7,
   },
   text: {
@@ -190,17 +201,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     alignSelf: "center",
-    paddingTop: 40,
-    paddingBottom: 10,
+    paddingTop: 5,
+    paddingBottom: 5,
     color: "white",
   },
   lineBarChart: {
-    flex: 0.4,
+    flex: 0.425,
     justifyContent: "center",
     alignItems: "center",
   },
   barCandlehart: {
-    flex: 0.4,
+    flex: 0.425,
     justifyContent: "center",
     alignItems: "center",
   },

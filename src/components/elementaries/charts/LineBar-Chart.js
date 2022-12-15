@@ -11,139 +11,164 @@ import {
   VictoryLabel,
 } from "victory-native";
 
-const xyData = (xData, yData) => {
-  let element = [];
-
-  for (let index = 0; index < xData.length; index++) {
-    let obj = { x: 0, y: 0 };
-    obj.x = xData[index];
-    obj.y = yData[index];
-    element.push(obj);
-  }
-  return element;
-};
-
 export const LineBarChart = (props) => {
-  const dailySpent = xyData(props.xValues, props.yValues);
-
-  let cumSum = [];
-  props.yValues.reduce((prev, curr, i) => (cumSum[i] = prev + curr), 0);
-  const cumulative = xyData(props.xValues, cumSum);
-
-  const budget = xyData(props.xValues, props.budgetValues);
-
-  const findMax = Math.max(...cumSum.concat(props.yValues, props.budgetValues));
-  const yMax = findMax + findMax * 0.1;
-
   const windowWidth = Math.round(Dimensions.get("window").width);
+  let legendText = [];
+  let legendColours = [];
+  let legendPosition = 100;
+
+  if (props.showCumulative) {
+    legendColours = ["red", "blue", "silver"];
+    legendText = [
+      {
+        name: props.legendTitles[0],
+        labels: { fill: "red", fontWeight: "bold" },
+      },
+      {
+        name: props.legendTitles[1],
+        labels: { fill: "blue", fontWeight: "bold" },
+      },
+      {
+        name: props.legendTitles[2],
+        labels: { fill: "silver", fontWeight: "bold" },
+      },
+    ];
+  } else {
+    legendPosition = 130;
+    legendColours = ["red", "silver"];
+    legendText = [
+      {
+        name: props.legendTitles[0],
+        labels: { fill: "red", fontWeight: "bold" },
+      },
+      {
+        name: props.legendTitles[1],
+        labels: { fill: "silver", fontWeight: "bold" },
+      },
+    ];
+  }
 
   return (
     <View style={styles.container}>
-      <VictoryChart
-        minDomain={{ x: 0, y: 0 }}
-        maxDomain={{ y: +yMax }}
-        width={windowWidth}
-        height={250}
-        padding={{ top: 50, bottom: 100, left: 50, right: 20 }}
-      >
-        <VictoryLabel
-          text="Daily Spend vs. Budget"
-          x={225}
-          y={30}
-          textAnchor="middle"
-          style={[{ fontWeight: "bold", fontSize: 18, fill: "white" }]}
-        />
-        <VictoryLegend
-          x={100}
-          y={200}
-          orientation="horizontal"
-          gutter={20}
-          style={{ border: { stroke: "black" } }}
-          colorScale={["red", "blue", "silver"]}
-          data={[
-            { name: "Budget", labels: { fill: "red", fontWeight: "bold" } },
-            {
-              name: "Cumulative",
-              labels: { fill: "blue", fontWeight: "bold" },
-            },
-            { name: "Daily", labels: { fill: "silver", fontWeight: "bold" } },
-          ]}
-        />
-        <VictoryAxis
-          dependentAxis
-          tickFormat={(tick) => tick}
-          style={{
-            tickLabels: { fontWeight: "bold", fontSize: 11, fill: "white" },
-            axis: {
-              stroke: "white",
-            },
-          }}
-        />
-        <VictoryAxis
-          label="Day"
-          tickValues={props.showValues}
-          //padding={{ top: 20, bottom: 60 }}
-          style={{
-            tickLabels: { fontWeight: "bold", fontSize: 11, fill: "white" },
-            axisLabel: { fontWeight: "bold", fontSize: 13, fill: "white" },
-            axis: {
-              stroke: "white",
-            },
-          }}
-        />
-        <VictoryGroup>
-          <VictoryLine
+      <View style={styles.titleContainer}>
+        <Title style={styles.title}>{props.title}</Title>
+      </View>
+      <View style={styles.chartContainer}>
+        <VictoryChart
+          //minDomain={{ x: 0, y: 0 }}
+          maxDomain={{ y: +props.maxValue }}
+          width={windowWidth}
+          height={300} //250
+          padding={{ top: 10, bottom: 100, left: 50, right: 20 }}
+        >
+          <VictoryLegend
+            x={legendPosition}
+            y={250}
+            orientation="horizontal"
+            gutter={20}
+            style={{ border: { stroke: "black" } }}
+            colorScale={legendColours}
+            data={legendText}
+          />
+          <VictoryAxis
+            dependentAxis
+            tickFormat={(tick) => tick}
             style={{
-              data: {
-                stroke: "#c43a31",
-                strokeWidth: 4,
-                strokeLinecap: "round",
+              tickLabels: { fontWeight: "bold", fontSize: 11, fill: "white" },
+              axis: {
+                stroke: "transparent",
               },
             }}
-            data={budget}
-            name="budget"
           />
-          <VictoryLine
+          <VictoryAxis
+            label={props.axisName}
+            tickValues={props.showValues}
+            //padding={{ top: 20, bottom: 60 }}
             style={{
-              data: {
-                stroke: "blue",
-                strokeWidth: 2,
-                strokeLinecap: "round",
+              tickLabels: {
+                fontWeight: "bold",
+                fontSize: 11,
+                fill: "white",
+                angle: props.orientation,
+              },
+              axisLabel: {
+                fontWeight: "bold",
+                fontSize: 13,
+                fill: "white",
+                padding: 33,
+              },
+              axis: {
+                stroke: "white",
               },
             }}
-            interpolation="step"
-            data={cumulative}
-            name="cumulative"
-            animate={{
-              duration: 3000,
-              easing: "bounce",
-              //onLoad: { duration: 3000 },
-            }}
           />
-          <VictoryBar
-            data={dailySpent}
-            name="dailySpent"
-            barWidth={5}
-            style={{ data: { fill: "silver" } }}
-            animate={{
-              duration: 3000,
-              easing: "bounce",
-              //onLoad: { duration: 3000 },
-            }}
-          />
-        </VictoryGroup>
-      </VictoryChart>
+          <VictoryGroup>
+            <VictoryLine
+              style={{
+                data: {
+                  stroke: "#c43a31",
+                  strokeWidth: 4,
+                  strokeLinecap: "round",
+                },
+              }}
+              data={props.budgetValues}
+              name={props.legendTitles[0]}
+            />
+            {props.showCumulative && (
+              <VictoryLine
+                style={{
+                  data: {
+                    stroke: "blue",
+                    strokeWidth: 2,
+                    strokeLinecap: "round",
+                  },
+                }}
+                interpolation="step"
+                data={props.cumulative}
+                name={props.legendTitles[1]}
+                animate={{
+                  duration: 3000,
+                  easing: "bounce",
+                  //onLoad: { duration: 3000 },
+                }}
+              />
+            )}
+            <VictoryBar
+              data={props.barValues1}
+              name={props.legendTitles[2]}
+              barWidth={5}
+              style={{ data: { fill: "silver" } }}
+              animate={{
+                duration: 3000,
+                easing: "bounce",
+                //onLoad: { duration: 3000 },
+              }}
+            />
+          </VictoryGroup>
+        </VictoryChart>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    //flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    //backgroundColor: "grey",
-
-    //width: "80%",
+  },
+  titleContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  title: {
+    fontWeight: "bold",
+    color: "white",
+    fontSize: 18,
+    justifyContent: "center",
+  },
+  chartContainer: {
+    justifyContent: "center",
+    width: "100%",
   },
 });
