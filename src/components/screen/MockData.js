@@ -8654,6 +8654,14 @@ export const mockData = [
     type: "income",
   },
   {
+    ID: 4045,
+    item: "Salary",
+    date: "2022/08/25",
+    amount: 29000,
+    limit: 29000,
+    type: "income",
+  },
+  {
     ID: 1046,
     item: "Salary-Bonus",
     date: "2019/04/07",

@@ -1,18 +1,17 @@
 import { Button, Card, Title } from "react-native-paper";
 import { StyleSheet, View, Text } from "react-native";
 import { ItemsProgressBar } from "../progress_displays/ItemsProgressBar";
+import { CurrencyFormatContext } from "../../../store/CurrencyFormat";
+import { toCurrency } from "../../computations/ToCurrency";
+import { useContext } from "react";
 
 export const ExpenseCard = (props) => {
+  const currencyCtx = useContext(CurrencyFormatContext);
   const name = props.name;
   const expense = +props.amount;
   const income = props.income;
   const limit = +props.limit;
   const type = props.type;
-
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
 
   const contrib = ((expense / income) * 100).toFixed(1);
 
@@ -53,7 +52,7 @@ export const ExpenseCard = (props) => {
           <View style={styles().cardFundsContainer}>
             <View style={styles().fundLeftContainer}>
               <Text style={styles(progressColour).textSpent}>
-                Spent: {formatter.format(expense)}
+                Spent: {toCurrency(expense, currencyCtx.getCurrencyCode)}
               </Text>
             </View>
           </View>

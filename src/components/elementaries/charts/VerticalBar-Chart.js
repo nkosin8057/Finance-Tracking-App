@@ -42,9 +42,6 @@ const dataB = [
 //   return { ...point, y };
 // });
 
-console.log(dataA);
-console.log(dataB);
-
 const width = 400;
 const height = 400;
 

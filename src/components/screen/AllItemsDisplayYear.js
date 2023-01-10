@@ -7,6 +7,9 @@ import { SafeAreaView, ImageBackground } from "react-native";
 import { candleStickData } from "../computations/CandleStickData";
 import { BarCandleChart } from "../elementaries/charts/BarCandle-Chart";
 import { Title } from "react-native-paper";
+import dateFormat from "dateformat";
+import { CurrencyFormatContext } from "../../store/CurrencyFormat";
+import { toCurrency } from "../computations/ToCurrency";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -20,17 +23,21 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-const findBudget = (data) => {
-  let unique = [];
+const findBudget = (data, date) => {
+  const budget = Array(12).fill(0);
+  const d = new Date(date);
+
   data.forEach((element) => {
-    if (!unique.includes(element.item)) {
-      unique.push(element);
+    const dt = new Date(element.date);
+    for (let index = 0; index < 12; index++) {
+      if (
+        new Date(d.getFullYear(), d.getMonth() - (11 - index), 1).getTime() ===
+        new Date(dt.getFullYear(), dt.getMonth(), 1).getTime()
+      ) {
+        budget[index] += +element.limit;
+      }
     }
   });
-
-  const budget = items.reduce((prev, curr) => {
-    return prev + curr.limit;
-  }, 0);
 
   return budget;
 };
@@ -38,45 +45,45 @@ const findBudget = (data) => {
 export const AllItemsDisplayYear = () => {
   const monthCtx = useContext(MonthContext);
   const incExpCtx = useContext(IncomeExpensesDataContext);
-  let expenses = [];
-  expenses = incExpCtx.getByYearSummed;
+  const currencyCtx = useContext(CurrencyFormatContext);
+  const unsummedExpenses = incExpCtx.getByYearUnsummed;
+  const summedExpenses = incExpCtx.getByYearSummed;
 
-  let xVals = [];
-  let yVals = [];
-  const summedBudget = findBudget(expenses);
-  let budget = [];
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  expenses.forEach((element) => {
-    const mnth = months[element.date.getMonth()];
-    const yr = element.date.getFullYear().toString().substr(-2);
-    xVals.push(`${mnth} ${yr}`);
-    yVals.push(element.amount);
-    budget.push(summedBudget);
+  //const summedBudget = findBudget(unsummedExpenses, monthCtx.monthDate);
+
+  const income = incExpCtx.getYearIncomeByMonth.map((element) => {
+    return element.amount;
+  });
+
+  //console.log(income);
+
+  const xVals = Array(12).fill(0);
+  const yVals = Array(12).fill(0);
+
+  summedExpenses.forEach((element) => {
+    const dt = new Date(element.date);
+    const d = new Date(monthCtx.monthDate);
+    for (let index = 0; index < 12; index++) {
+      if (
+        new Date(d.getFullYear(), d.getMonth() - (11 - index), 1).getTime() ===
+        new Date(dt.getFullYear(), dt.getMonth(), 1).getTime()
+      ) {
+        xVals[index] = `${dateFormat(dt, "mmm")} ${dateFormat(dt, "yy")}`;
+        yVals[index] += element.amount;
+      }
+    }
   });
 
   const barValues1 = xyData(xVals, yVals);
+  const budgetValues = xyData(xVals, income);
+  //console.log(barValues1);
 
-  const budgetValues = xyData(xVals, budget);
-
-  const findMax = Math.max(...yVals.concat(budget));
+  const findMax = Math.max(...yVals.concat(income));
   const yMax = findMax + findMax * 0.1;
 
   const showValues = xVals;
 
-  const csData = incExpCtx.getByYearUnsummed.map((element) => {
+  const csData = incExpCtx.getByYearSummed.map((element) => {
     return {
       date: new Date(element.date),
       amount: element.amount,
@@ -86,8 +93,8 @@ export const AllItemsDisplayYear = () => {
 
   const candleData = candleStickData(csData, monthCtx.monthDate);
   candleData.forEach((element) => {
-    const mnth = months[element.x.getMonth()];
-    const yr = element.x.getFullYear().toString().substr(-2);
+    const mnth = dateFormat(element.x, "mmm");
+    const yr = dateFormat(element.x, "yy");
     element.x = `${mnth} ${yr}`;
   });
   const csMax = Math.max(...candleData.map((mValue) => mValue.y));
@@ -100,24 +107,23 @@ export const AllItemsDisplayYear = () => {
     lossProfitText = "Loss";
   }
 
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
-
   const image = require("../../../assets/images/money_jar.jpg");
 
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        {expenses.length > 0 && (
+        {summedExpenses.length > 0 && (
           <View style={styles.secondContainer}>
             <View style={styles.titleContainer}>
-              <Title style={styles.title}>{expenses[0].item}</Title>
+              <Title style={styles.title}>All</Title>
             </View>
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
-                Total Spent: {formatter.format(incExpCtx.getByYearTotal)}
+                Total Spent:
+                {toCurrency(
+                  incExpCtx.getByYearTotal,
+                  currencyCtx.getCurrencyCode
+                )}
               </Text>
               {
                 <Text
@@ -127,14 +133,15 @@ export const AllItemsDisplayYear = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  {lossProfitText}: {formatter.format(lossProfit)}
+                  {lossProfitText}:
+                  {toCurrency(lossProfit, currencyCtx.getCurrencyCode)}
                 </Text>
               }
             </View>
             <View style={styles.lineBarChart}>
               <LineBarChart
-                title={"Monthly Spend vs. Budget"}
-                legendTitles={["Budget", "Monthly"]}
+                title={"Monthly Spend vs. Income"}
+                legendTitles={["Income", "Monthly"]}
                 barValues1={barValues1}
                 secondaryBars={false}
                 budgetValues={budgetValues}

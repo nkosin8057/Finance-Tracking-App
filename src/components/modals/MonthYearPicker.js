@@ -30,14 +30,18 @@ export const MonthYearPicker = (props) => {
     year.push(monthCtx.startMonth.getFullYear() + index);
   }
 
-  let monthIndex = 0;
+  let monthIndex = monthCtx.monthDate.getMonth();
   const getMonthHandler = (index) => {
     monthIndex = index;
+    console.log(monthIndex);
   };
 
-  let yearIndex = 0;
+  let yearIndex = year.findIndex((yr) => {
+    return yr === monthCtx.monthDate.getFullYear();
+  });
   const getYearHandler = (index) => {
     yearIndex = index;
+    console.log(monthIndex);
   };
 
   const onSubmitHandler = () => {
@@ -51,27 +55,18 @@ export const MonthYearPicker = (props) => {
 
   return (
     <View style={styles.centeredView}>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={props.modalShow}
-        // onRequestClose={() => {
-        //   setModalVisible(!modalVisible);
-        // }}
-      >
+      <Modal animationType="fade" transparent={true} visible={props.modalShow}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <View style={styles.rowFlex}>
               <WheelPickerDisplay
-                index={monthCtx.monthDate.getMonth()}
+                index={monthIndex}
                 data={months}
                 getSelectedValue={getMonthHandler}
               />
               <View style={styles.wheelPickerComp}>
                 <WheelPickerDisplay
-                  index={year.findIndex((yr) => {
-                    return yr === monthCtx.monthDate.getFullYear();
-                  })}
+                  index={yearIndex}
                   data={year}
                   getSelectedValue={getYearHandler}
                 />

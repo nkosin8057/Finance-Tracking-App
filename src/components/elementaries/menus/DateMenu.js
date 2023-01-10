@@ -4,14 +4,15 @@ import { MonthYearPicker } from "../../modals/MonthYearPicker";
 import { useState, useContext } from "react";
 import { MonthContext } from "../../../store/MonthProvider";
 import { IncomeExpensesDataContext } from "../../../store/IncomeExpensesDataProvider";
+import { monthName } from "../../computations/MonthName";
 
 export const DateMenu = () => {
   const [showModal, setShowModal] = useState(false);
   const monthCtx = useContext(MonthContext);
   const incExpCtx = useContext(IncomeExpensesDataContext);
-  const monthName = monthCtx.monthDate.toLocaleString("default", {
-    month: "long",
-  });
+
+  const month = monthName(monthCtx.monthDate);
+
   const year = monthCtx.monthDate.getFullYear();
 
   const modalCloseHandler = () => {
@@ -21,7 +22,7 @@ export const DateMenu = () => {
   return (
     <View style={styles.cardContainer}>
       <View style={styles.rowFlex}>
-        <Text style={styles.text}>{`${monthName} ${year}`}</Text>
+        <Text style={styles.text}>{`${month} ${year}`}</Text>
         <IconButton
           icon="calendar-month"
           size={30}

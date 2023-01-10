@@ -13,6 +13,8 @@ import { useContext } from "react";
 import { LineBarChart } from "../elementaries/charts/LineBar-Chart";
 import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { SingleItemExpenseCard } from "../elementaries/cards/SingleItemExpenseCard";
+import { CurrencyFormatContext } from "../../store/CurrencyFormat";
+import { toCurrency } from "../computations/ToCurrency";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -32,6 +34,7 @@ const mockDescription =
 export const AllItemDisplayMonth = () => {
   const monthCtx = useContext(MonthContext);
   const incExpCtx = useContext(IncomeExpensesDataContext);
+  const currencyCtx = useContext(CurrencyFormatContext);
   let expenses = [];
 
   const monthEndDay = new Date(
@@ -86,6 +89,7 @@ export const AllItemDisplayMonth = () => {
 
   const renderItem = ({ item }) => (
     <SingleItemExpenseCard
+      item={item.item}
       date={item.date}
       amount={item.amount}
       description={mockDescription}
@@ -103,11 +107,6 @@ export const AllItemDisplayMonth = () => {
   const findMax = Math.max(...cumSum.concat(yVals, budget));
   const yMax = findMax + findMax * 0.1;
 
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
-
   const image = require("../../../assets/images/money_jar.jpg");
 
   return (
@@ -115,12 +114,10 @@ export const AllItemDisplayMonth = () => {
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
         {expenses.length > 0 && (
           <View style={styles.secondContainer}>
-            <View style={styles.titleContainer}>
-              <Title style={styles.title}>{expenses[0].item}</Title>
-            </View>
             <View style={styles.totalSummaryContainer}>
               <Text style={styles.text}>
-                Total Spent: {formatter.format(totalSpent)}
+                Total Spent:{" "}
+                {toCurrency(totalSpent, currencyCtx.getCurrencyCode)}
               </Text>
               {
                 <Text
@@ -130,7 +127,8 @@ export const AllItemDisplayMonth = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  {lossProfitText}: {formatter.format(profitLoss)}
+                  {lossProfitText}:{" "}
+                  {toCurrency(profitLoss, currencyCtx.getCurrencyCode)}
                 </Text>
               }
             </View>
@@ -183,18 +181,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  titleContainer: {
-    flex: 0.05,
-    ustifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 28,
-    alignSelf: "center",
-    //paddingTop: ,
-    paddingBottom: 10,
-    color: "white",
-  },
   totalSummaryContainer: {
     flex: 0.1,
     justifyContent: "center",
@@ -204,6 +190,7 @@ const styles = StyleSheet.create({
     borderColor: "white",
     backgroundColor: "silver",
     opacity: 0.7,
+    marginTop: 15,
   },
   text: {
     fontSize: 18,
@@ -215,7 +202,7 @@ const styles = StyleSheet.create({
     flex: 0.45,
   },
   listContainer: {
-    flex: 0.4,
+    flex: 0.45,
     width: "100%",
   },
 });

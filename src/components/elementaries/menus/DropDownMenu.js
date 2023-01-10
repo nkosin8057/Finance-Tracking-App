@@ -25,7 +25,7 @@ export const DropDownMenu = (props) => {
   const closeMenu = () => setVisible(false);
 
   const getMenuItem = (item) => {
-    console.log(item);
+    //console.log(item);
   };
 
   return (

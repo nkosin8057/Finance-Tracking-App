@@ -13,6 +13,8 @@ import { useContext } from "react";
 import { LineBarChart } from "../elementaries/charts/LineBar-Chart";
 import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { SingleItemExpenseCard } from "../elementaries/cards/SingleItemExpenseCard";
+import { CurrencyFormatContext } from "../../store/CurrencyFormat";
+import { toCurrency } from "../computations/ToCurrency";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -32,6 +34,8 @@ const mockDescription =
 export const SingleItemDisplayMonth = () => {
   const monthCtx = useContext(MonthContext);
   const incExpCtx = useContext(IncomeExpensesDataContext);
+  const currencyCtx = useContext(CurrencyFormatContext);
+  const options = { year: "numeric", month: "short", day: "numeric" };
   let expenses = [];
 
   const monthEndDay = new Date(
@@ -86,6 +90,7 @@ export const SingleItemDisplayMonth = () => {
 
   const renderItem = ({ item }) => (
     <SingleItemExpenseCard
+      item={item.item}
       date={item.date}
       amount={item.amount}
       description={mockDescription}
@@ -103,11 +108,6 @@ export const SingleItemDisplayMonth = () => {
   const findMax = Math.max(...cumSum.concat(yVals, budget));
   const yMax = findMax + findMax * 0.1;
 
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
-
   const image = require("../../../assets/images/money_jar.jpg");
 
   return (
@@ -120,7 +120,8 @@ export const SingleItemDisplayMonth = () => {
             </View>
             <View style={styles.totalSummaryContainer}>
               <Text style={styles.text}>
-                Total Spent: {formatter.format(totalSpent)}
+                Total Spent:
+                {toCurrency(totalSpent, currencyCtx.getCurrencyCode)}
               </Text>
               {
                 <Text
@@ -130,7 +131,8 @@ export const SingleItemDisplayMonth = () => {
                     fontWeight: "bold",
                   }}
                 >
-                  {lossProfitText}: {formatter.format(profitLoss)}
+                  {lossProfitText}:
+                  {toCurrency(profitLoss, currencyCtx.getCurrencyCode)}
                 </Text>
               }
             </View>

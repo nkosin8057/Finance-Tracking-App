@@ -1,8 +1,12 @@
 import { Card } from "react-native-paper";
 import { View, StyleSheet, Text } from "react-native";
 import { SemiCircleProgressDisplay } from "../progress_displays/SemiCircleProgress";
+import { CurrencyFormatContext } from "../../../store/CurrencyFormat";
+import { toCurrency } from "../../computations/ToCurrency";
+import { useContext } from "react";
 
 export const TotalSummaryCard = (props) => {
+  const currencyCtx = useContext(CurrencyFormatContext);
   const profitLoss = +props.total - +props.spent;
   const ratio = +props.spent / +props.total;
   let textColour = "#00cc33";
@@ -15,18 +19,13 @@ export const TotalSummaryCard = (props) => {
     textColour = "#CE1717";
   }
 
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
-
   return (
     <Card style={styles().cardContainer}>
       <View style={styles().cardViewContainer}>
         <SemiCircleProgressDisplay spent={+props.spent} total={+props.total} />
         <Text style={styles(textColour).profitLossText}>
           {profitLoss < 0 ? "Loss: " : "Profit: "}{" "}
-          {formatter.format(profitLoss)}
+          {toCurrency(profitLoss, currencyCtx.getCurrencyCode)}
         </Text>
       </View>
     </Card>

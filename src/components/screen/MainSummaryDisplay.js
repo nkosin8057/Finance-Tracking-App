@@ -17,11 +17,13 @@ import { DateMenu } from "../elementaries/menus/DateMenu";
 import { useContext, useEffect, useState } from "react";
 import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
 import { MonthContext } from "../../store/MonthProvider";
-import { BottomNavigationDisplay } from "./BottomNavigationDisplay";
+import { toCurrency } from "../computations/ToCurrency";
+import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 
 export const MainSummaryDisplay = ({ navigation }) => {
   const incExpCtx = useContext(IncomeExpensesDataContext);
   const monthCtx = useContext(MonthContext);
+  const currencyCtx = useContext(CurrencyFormatContext);
   const [name, setName] = useState("");
 
   useEffect(() => {
@@ -31,11 +33,6 @@ export const MainSummaryDisplay = ({ navigation }) => {
   useEffect(() => {
     incExpCtx.setGetSingleItem(name, monthCtx.monthDate);
   }, [name]);
-
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
 
   const renderItem = ({ item }) => (
     <ExpenseCard
@@ -63,17 +60,26 @@ export const MainSummaryDisplay = ({ navigation }) => {
         <View style={styles.circularDisplayContainer}>
           <InfoCircularCard
             title={"Income"}
-            value={formatter.format(incExpCtx.getIncomeByMonth)}
+            value={toCurrency(
+              incExpCtx.getIncomeByMonth,
+              currencyCtx.getCurrencyCode
+            )}
             textColour={"#FFFFFF"}
           />
           <InfoCircularCard
             title={"Fixed Expenses"}
-            value={formatter.format(incExpCtx.getFixedTotalMonth)}
+            value={toCurrency(
+              incExpCtx.getFixedTotalMonth,
+              currencyCtx.getCurrencyCode
+            )}
             textColour={"#FFFFFF"}
           />
           <InfoCircularCard
             title={"Variable Expenses"}
-            value={formatter.format(incExpCtx.getVariableTotalMonth)}
+            value={toCurrency(
+              incExpCtx.getVariableTotalMonth,
+              currencyCtx.getCurrencyCode
+            )}
             textColour={"#FFFFFF"}
           />
         </View>
@@ -92,7 +98,6 @@ export const MainSummaryDisplay = ({ navigation }) => {
             contentContainerStyle={{ padding: 5 }}
           />
         </View>
-        {/* <BottomNavigationDisplay /> */}
       </ImageBackground>
     </View>
   );

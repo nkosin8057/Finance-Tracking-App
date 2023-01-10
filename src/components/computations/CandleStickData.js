@@ -1,10 +1,4 @@
 export const candleStickData = (data, endMonth) => {
-  //   if (data.length === 0) return;
-
-  //   dataValues = data.map((element) => {
-  //     return { date: new Date(element.date), difference: element.amount };
-  //   });
-
   const cData = [];
 
   for (let i = 11; i >= 0; i--) {
@@ -32,8 +26,8 @@ export const candleStickData = (data, endMonth) => {
         sum += value.amount;
         budget = value.budget;
         if (dataMonth.getTime() === new Date(2021, 8, 1).getTime()) {
-          console.log(value.amount);
-          console.log(sum);
+          //console.log(value.amount);
+          //console.log(sum);
         }
       }
     });
@@ -44,6 +38,6 @@ export const candleStickData = (data, endMonth) => {
     }
     yStart = element.y;
   });
-  console.log(cData);
+  //console.log(cData);
   return cData;
 };

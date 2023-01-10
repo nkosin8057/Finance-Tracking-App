@@ -1,36 +1,42 @@
 import { Card, Title } from "react-native-paper";
 import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { ShowMoreText } from "../../modals/ShowMoreText";
+import { CurrencyFormatContext } from "../../../store/CurrencyFormat";
+import { toCurrency } from "../../computations/ToCurrency";
+import { useContext } from "react";
+import dateFormat from "dateformat";
 
 export const SingleItemExpenseCard = (props) => {
-  const options = { year: "numeric", month: "short", day: "numeric" };
-  const formatter = new Intl.NumberFormat("en-ZA", {
-    style: "currency",
-    currency: "ZAR",
-  });
+  const currencyCtx = useContext(CurrencyFormatContext);
 
-  const date = new Date(props.date).toLocaleDateString("en-ZA", options);
-  const amount = formatter.format(+props.amount);
+  const item = props.item;
+  const date = dateFormat(new Date(props.date), "dd mmm yy");
+  const amount = toCurrency(+props.amount, currencyCtx.getCurrencyCode);
   const description = props.description;
 
   return (
     <Card style={styles.cardContainer}>
       <View style={styles.cardViewContainer}>
-        <View style={styles.cardLeftContainer}>
-          <View style={styles.cardDateContainer}>
-            <Title style={styles.date}>{date}</Title>
-          </View>
-          <View style={styles.cardAmountContainer}>
-            <Text style={styles.amount}>{amount}</Text>
-          </View>
+        <View style={styles.cardTopContainer}>
+          <Title style={styles.title}>{item}</Title>
         </View>
-        <View style={styles.cardRightContainer}>
-          <View style={styles.descriptionTitleContainer}>
-            <Text style={styles.descriptionTitle}>Description</Text>
+        <View style={styles.cardBottomContainer}>
+          <View style={styles.cardLeftContainer}>
+            <View style={styles.cardDateContainer}>
+              <Text style={styles.text}>{date}</Text>
+            </View>
+            <View style={styles.cardAmountContainer}>
+              <Text style={styles.text}>{amount}</Text>
+            </View>
           </View>
-          <ScrollView style={styles.descriptionContainer}>
-            <ShowMoreText description={description} />
-          </ScrollView>
+          <View style={styles.cardRightContainer}>
+            <View style={styles.descriptionTitleContainer}>
+              <Text style={styles.descriptionTitle}>Description</Text>
+            </View>
+            <ScrollView style={styles.descriptionContainer}>
+              <ShowMoreText description={description} />
+            </ScrollView>
+          </View>
         </View>
       </View>
     </Card>
@@ -40,7 +46,7 @@ export const SingleItemExpenseCard = (props) => {
 const styles = StyleSheet.create({
   cardContainer: {
     padding: 10,
-    height: 120,
+    height: 140,
     width: "100%",
     borderWidth: 1,
     borderColor: "white",
@@ -50,8 +56,18 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   cardViewContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     flex: 1,
+  },
+  cardTopContainer: {
+    flex: 0.3,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardBottomContainer: {
+    flex: 0.7,
+    flexDirection: "row",
   },
   cardLeftContainer: {
     flex: 0.4,
@@ -63,7 +79,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  date: {
+  title: {
     fontWeight: "bold",
     color: "white",
   },
@@ -73,7 +89,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  amount: {
+  text: {
     fontSize: 18,
     fontWeight: "bold",
     color: "white",
@@ -83,16 +99,12 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   descriptionTitleContainer: {
-    flex: 0.3,
+    flex: 0.4,
     height: "100%",
   },
   descriptionContainer: {
-    flex: 0.7,
+    flex: 0.6,
     height: "100%",
-    // borderColor: "white",
-    // borderWidth: 2,
-    // backgroundColor: "silver",
-    // opacity: 0.7,
   },
   description: {
     fontSize: 13,

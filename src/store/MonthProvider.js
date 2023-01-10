@@ -40,7 +40,7 @@ const monthReducer = (state, action) => {
     };
   }
 
-  return defaultSate;
+  return defaultState;
 };
 
 const MonthProvider = (props) => {

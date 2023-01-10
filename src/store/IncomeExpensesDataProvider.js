@@ -8,7 +8,15 @@ const expenseItemsSummed = (expenseData) => {
 
   expenseData.map((expenseItem) => {
     let exist = summedExpenses.findIndex((expense) => {
-      return expense.item === expenseItem.item;
+      const d = new Date(expenseItem.date);
+      return (
+        expense.item === expenseItem.item &&
+        new Date(
+          expense.date.getFullYear(),
+          expense.date.getMonth(),
+          1
+        ).getTime() === new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+      );
     });
 
     if (exist != -1) {
@@ -90,12 +98,13 @@ export const IncomeExpensesDataContext = React.createContext({
   getItemByMonth: [],
   getItemByYearSummed: [],
   getItemByYearUnsummed: [],
+  getYearIncomeByMonth: [],
+  getIncomeByMonth: 0,
   getItemByYearTotal: 0,
   getByYearTotal: 0,
   getTotalByMonth: 0,
   getTotalByName: 0,
   getIncomeAll: 0,
-  getIncomeByMonth: 0,
   getFixedTotalMonth: 0,
   getVariableTotalMonth: 0,
   setGetByMonth: (month) => {},
@@ -112,11 +121,12 @@ const defaultState = {
   getItemByMonth: [],
   getItemByYearSummed: [],
   getItemByYearUnsummed: [],
+  getYearIncomeByMonth: [],
+  getIncomeByMonth: 0,
   getItemByYearTotal: 0,
   getByYearTotal: 0,
   getTotalByMonth: 0,
   getTotalByName: 0,
-  getIncomeByMonth: 0,
   getFixedTotalMonth: 0,
   getVariableTotalMonth: 0,
 };
@@ -159,6 +169,24 @@ const incomeExpensesDataReducer = (state, action) => {
       );
     });
 
+    const yearIncomes = mockData.filter((expenses) => {
+      const expDate = new Date(expenses.date);
+      const endDate = new Date(
+        action.month.getFullYear(),
+        action.month.getMonth() + 1,
+        1
+      );
+      const startDate = new Date(
+        action.month.getFullYear(),
+        action.month.getMonth() - 11,
+        1
+      );
+
+      return (
+        expDate >= startDate && expDate < endDate && expenses.type === "income"
+      );
+    });
+
     const yearExpenses = mockData.filter((expenses) => {
       const expDate = new Date(expenses.date);
       const endDate = new Date(
@@ -175,13 +203,13 @@ const incomeExpensesDataReducer = (state, action) => {
       return (
         expDate >= startDate &&
         expDate < endDate &&
-        expenses.item === action.name &&
         (expenses.type === "exp-variable" || expenses.type === "exp-fixed")
       );
     });
 
+    nuExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
     yearExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+    //console.log(yearIncomes);
     return {
       getByMonthSummed: expenseItemsSummed(nuExpenses),
       getByMonthUnsummed: nuExpenses,
@@ -190,12 +218,13 @@ const incomeExpensesDataReducer = (state, action) => {
       getItemByMonth: state.getItemByMonth,
       getItemByYearSummed: state.getItemByYearSummed,
       getItemByYearUnsummed: state.getItemByYearUnsummed,
+      getYearIncomeByMonth: yearIncomes,
+      getIncomeByMonth: itemTotal(nuIncomes),
       getItemByYearTotal: state.getItemByYearTotal,
       getByYearTotal: itemTotal(yearExpenses),
       getTotalByMonth: itemTotal(nuExpenses),
       getTotalByName: state.getTotalByName,
       getIncomeAll: state.getIncomeAll,
-      getIncomeByMonth: itemTotal(nuIncomes),
       getFixedTotalMonth: itemTotal(nuFixed),
       getVariableTotalMonth: itemTotal(nuVariable),
     };
@@ -238,15 +267,18 @@ const incomeExpensesDataReducer = (state, action) => {
     return {
       getByMonthSummed: state.getByMonthSummed,
       getByMonthUnsummed: state.getByMonthUnsummed,
+      getByYearSummed: state.getByYearSummed,
+      getByYearUnsummed: state.getByYearUnsummed,
       getItemByMonth: monthExpenses,
       getItemByYearSummed: SingleExpenseItemsSummed(yearExpenses),
       getItemByYearTotal: itemTotal(yearExpenses),
+      getYearIncomeByMonth: state.getYearIncomeByMonth,
+      getIncomeByMonth: state.getIncomeByMonth,
       getByYearTotal: state.getByYearTotal,
       getItemByYearUnsummed: yearExpenses,
-      getTotalByMonth: state.getTotalByName,
+      getTotalByMonth: state.getTotalByMonth,
       getTotalByName: state.getTotalByName,
       getIncomeAll: state.getIncomeAll,
-      getIncomeByMonth: state.getIncomeByMonth,
       getFixedTotalMonth: state.getFixedTotalMonth,
       getVariableTotalMonth: state.getVariableTotalMonth,
     };
@@ -279,6 +311,7 @@ const IncomeExpensesDataProvider = (props) => {
     getItemByMonth: incExpState.getItemByMonth,
     getItemByYearUnsummed: incExpState.getItemByYearUnsummed,
     getItemByYearSummed: incExpState.getItemByYearSummed,
+    getYearIncomeByMonth: incExpState.getYearIncomeByMonth,
     getItemByYearTotal: incExpState.getItemByYearTotal,
     getByYearTotal: incExpState.getByYearTotal,
     getByName: incExpState.getByName,
