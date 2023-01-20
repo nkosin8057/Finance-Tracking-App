@@ -13,6 +13,7 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 import { HomeScreen } from "./src/components/screen/HomeScreen";
 import { AllItemsDisplay } from "./src/components/screen/AllItemsDisplay";
 import { Ionicons } from "@expo/vector-icons";
+import { EditDisplay } from "./src/components/screen/EditDisplay";
 
 export default function App() {
   // const d = new Date(2022, 11, 1).valueOf();
@@ -54,6 +55,20 @@ export default function App() {
                     tabBarLabel: "All",
                     tabBarIcon: ({ color }) => (
                       <Ionicons name="wallet" color={color} size={26} />
+                    ),
+                  }}
+                />
+                <Tab.Screen
+                  name="Edit"
+                  component={EditDisplay}
+                  options={{
+                    tabBarLabel: "Edit",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons
+                        name="md-pencil-outline"
+                        color={color}
+                        size={26}
+                      />
                     ),
                   }}
                 />
