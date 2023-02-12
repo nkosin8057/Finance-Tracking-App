@@ -1,4 +1,10 @@
-import { View, ImageBackground, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  ImageBackground,
+  StyleSheet,
+  FlatList,
+  SafeAreaView,
+} from "react-native";
 import { EditCard } from "../elementaries/cards/EditCard";
 import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
 import { MonthContext } from "../../store/MonthProvider";
@@ -9,7 +15,8 @@ import { toCurrency } from "../computations/ToCurrency";
 import dateFormat from "dateformat";
 import { AddEditDataModal } from "../modals/Add-EditDataModal";
 import { Date_Picker } from "../modals/DatePicker";
-import { DayPicker } from "react-day-picker";
+import { IconButton } from "react-native-paper";
+import { StatusBar } from "react-native";
 
 const mockDescription =
   "Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description";
@@ -20,6 +27,7 @@ export const EditDisplay = () => {
   const currencyCtx = useContext(CurrencyFormatContext);
 
   const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState({});
 
   useEffect(() => {
     incExpCtx.setGetByMonth(monthCtx.monthDate);
@@ -29,14 +37,21 @@ export const EditDisplay = () => {
     setShowModal(false);
   };
 
-  const getID_Handler = (id) => {
-    console.log("ID = " + id);
-  };
-
-  const onButtonSelected = () => {
+  let data = {};
+  const onButtonSelected = (id) => {
+    //console.log(id);
+    //console.log(incExpCtx.getByMonthUnsummed);
     setShowModal(true);
+    const d = incExpCtx.getByMonthUnsummed.find(({ ID }) => ID === id);
+    setModalData(d);
+
+    //console.log(dat);
   };
 
+  const onDataSubmitted = (data) => {
+    console.log(data);
+  };
+  //console.log("data= " + modalData.item);
   const renderItem = ({ item }) => (
     <EditCard
       id={item.ID}
@@ -46,22 +61,26 @@ export const EditDisplay = () => {
       budget={toCurrency(item.limit, currencyCtx.getCurrencyCode)}
       type={item.type}
       description={mockDescription}
-      getID={getID_Handler}
       onButtonSelected={onButtonSelected}
     />
   );
 
   const image = require("../../../assets/images/money_plant2.jpg");
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
         <View style={styles.dateDisplayContainer}>
-          <AddEditDataModal
-            modalShow={showModal}
-            modalClose={modalCloseHandler}
-          />
+          <View style={styles.modalContainer}>
+            {Object.keys(modalData).length !== 0 && (
+              <AddEditDataModal
+                modalShow={showModal}
+                modalClose={modalCloseHandler}
+                data={modalData}
+                onDataSubmitted={onDataSubmitted}
+              />
+            )}
+          </View>
           <DateMenu />
-          <DayPicker />
         </View>
         <View style={styles.listContainer}>
           {/* <Title style={styles.titleText}></Title> */}
@@ -73,20 +92,17 @@ export const EditDisplay = () => {
           />
         </View>
       </ImageBackground>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //marginTop: StatusBar.currentHeight,
-    // flexDirection: "column",
-    // flexDirection: "column",
-    // alignItems: "center",
-    // justifyContent: "center",
-    // paddingLeft: 10,
     width: "100%",
+  },
+  modalContainer: {
+    marginTop: StatusBar.currentHeight,
   },
   image: {
     flex: 1,
@@ -94,14 +110,13 @@ const styles = StyleSheet.create({
   },
   dateDisplayContainer: {
     flex: 0.1,
-    marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 15,
   },
 
   listContainer: {
     width: "100%",
     flex: 0.9,
+    marginTop: 35,
   },
 });

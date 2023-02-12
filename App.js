@@ -14,6 +14,7 @@ import { HomeScreen } from "./src/components/screen/HomeScreen";
 import { AllItemsDisplay } from "./src/components/screen/AllItemsDisplay";
 import { Ionicons } from "@expo/vector-icons";
 import { EditDisplay } from "./src/components/screen/EditDisplay";
+import { BalanceSheet } from "./src/components/screen/BalanceSheet";
 
 export default function App() {
   // const d = new Date(2022, 11, 1).valueOf();
@@ -66,6 +67,20 @@ export default function App() {
                     tabBarIcon: ({ color }) => (
                       <Ionicons
                         name="md-pencil-outline"
+                        color={color}
+                        size={26}
+                      />
+                    ),
+                  }}
+                />
+                <Tab.Screen
+                  name="BalanceSheet"
+                  component={BalanceSheet}
+                  options={{
+                    tabBarLabel: "Bal. Sheet",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons
+                        name="receipt-outline"
                         color={color}
                         size={26}
                       />

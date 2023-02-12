@@ -2,83 +2,123 @@ import React from "react";
 import { useReducer } from "react";
 import { mockData } from "../components/screen/MockData";
 
-const expenseItemsSummed = (expenseData) => {
-  let summedExpenses = [];
+const itemsSummed = (data) => {
+  let summedItems = [];
   let i = 0;
 
-  expenseData.map((expenseItem) => {
-    let exist = summedExpenses.findIndex((expense) => {
-      const d = new Date(expenseItem.date);
+  data.map((item) => {
+    let exist = summedItems.findIndex((indexData) => {
+      const d = new Date(item.date);
       return (
-        expense.item === expenseItem.item &&
+        indexData.item === item.item &&
         new Date(
-          expense.date.getFullYear(),
-          expense.date.getMonth(),
+          indexData.date.getFullYear(),
+          indexData.date.getMonth(),
           1
         ).getTime() === new Date(d.getFullYear(), d.getMonth(), 1).getTime()
       );
     });
 
-    if (exist != -1) {
-      summedExpenses[exist].amount += expenseItem.amount;
+    if (exist !== -1) {
+      summedItems[exist].id = Math.floor(Math.random() * (1000000 - 1 + 1)) + 1;
+      summedItems[exist].amount += item.amount;
     } else {
-      const d = new Date(expenseItem.date);
-      const dt = new Date(d.getFullYear(), d.getMonth(), 1);
+      const d = new Date(item.date);
       let expObj = {
-        id: i,
-        item: expenseItem.item,
-        amount: expenseItem.amount,
-        limit: expenseItem.limit,
-        type: expenseItem.type,
-        date: dt,
+        id: Math.floor(Math.random() * (1000000 - 1 + 1)) + 1,
+        item: item.item,
+        amount: item.amount,
+        limit: item.limit,
+        type: item.type,
+        date: new Date(d.getFullYear(), d.getMonth(), 1),
       };
 
-      summedExpenses.push(expObj);
-      i++;
-    }
-  });
-  summedExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
-  return summedExpenses;
-};
-
-const SingleExpenseItemsSummed = (expenseData) => {
-  let summedExpenses = [];
-  let i = 0;
-
-  expenseData.map((expenseItem) => {
-    const d = new Date(expenseItem.date);
-
-    let exist = summedExpenses.findIndex((expense) => {
-      const dt = new Date(expense.date);
-      //console.log(dt);
-      return (
-        new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() ===
-        new Date(d.getFullYear(), d.getMonth(), 1).getTime()
-      );
-    });
-
-    if (exist != -1) {
-      summedExpenses[exist].amount += expenseItem.amount;
-    } else {
-      const dt = new Date(d.getFullYear(), d.getMonth(), 1);
-      let expObj = {
-        id: i,
-        item: expenseItem.item,
-        amount: expenseItem.amount,
-        limit: expenseItem.limit,
-        type: expenseItem.type,
-        date: dt,
-      };
-
-      summedExpenses.push(expObj);
+      summedItems.push(expObj);
       i++;
     }
   });
 
-  summedExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  return summedExpenses;
+  summedItems.sort((a, b) => new Date(a.date) - new Date(b.date));
+  return summedItems;
 };
+
+// const expenseItemsSummed = (expenseData) => {
+//   let summedExpenses = [];
+//   let i = 0;
+
+//   expenseData.map((expenseItem) => {
+//     let exist = summedExpenses.findIndex((expense) => {
+//       const d = new Date(expenseItem.date);
+//       return (
+//         expense.item === expenseItem.item &&
+//         new Date(
+//           expense.date.getFullYear(),
+//           expense.date.getMonth(),
+//           1
+//         ).getTime() === new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+//       );
+//     });
+
+//     if (exist != -1) {
+//       summedExpenses[exist].amount += expenseItem.amount;
+//     } else {
+//       const d = new Date(expenseItem.date);
+//       const dt = new Date(d.getFullYear(), d.getMonth(), 1);
+//       let expObj = {
+//         id: i,
+//         item: expenseItem.item,
+//         amount: expenseItem.amount,
+//         limit: expenseItem.limit,
+//         type: expenseItem.type,
+//         date: dt,
+//       };
+
+//       summedExpenses.push(expObj);
+//       i++;
+//     }
+//   });
+//   summedExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+//   return summedExpenses;
+// };
+
+// const SingleExpenseItemsSummed = (expenseData) => {
+//   let summedExpenses = [];
+//   let i = 0;
+
+//   expenseData.map((expenseItem) => {
+//     const d = new Date(expenseItem.date);
+
+//     let exist = summedExpenses.findIndex((expense) => {
+//       const dt = new Date(expense.date);
+//       //console.log(dt);
+//       return (
+//         new Date(dt.getFullYear(), dt.getMonth(), 1).getTime() ===
+//         new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+//       );
+//     });
+
+//     if (exist != -1) {
+//       summedExpenses[exist].amount += expenseItem.amount;
+//     } else {
+//       const dt = new Date(d.getFullYear(), d.getMonth(), 1);
+//       let expObj = {
+//         id: i,
+//         item: expenseItem.item,
+//         amount: expenseItem.amount,
+//         limit: expenseItem.limit,
+//         type: expenseItem.type,
+//         date: dt,
+//       };
+
+//       summedExpenses.push(expObj);
+//       i++;
+//     }
+//   });
+
+//   summedExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+//   return summedExpenses;
+// };
 
 const itemTotal = (items) => {
   let sum = 0;
@@ -211,9 +251,9 @@ const incomeExpensesDataReducer = (state, action) => {
     yearExpenses.sort((a, b) => new Date(a.date) - new Date(b.date));
     //console.log(yearIncomes);
     return {
-      getByMonthSummed: expenseItemsSummed(nuExpenses),
+      getByMonthSummed: itemsSummed(nuExpenses),
       getByMonthUnsummed: nuExpenses,
-      getByYearSummed: expenseItemsSummed(yearExpenses),
+      getByYearSummed: itemsSummed(yearExpenses),
       getByYearUnsummed: yearExpenses,
       getItemByMonth: state.getItemByMonth,
       getItemByYearSummed: state.getItemByYearSummed,
@@ -270,7 +310,7 @@ const incomeExpensesDataReducer = (state, action) => {
       getByYearSummed: state.getByYearSummed,
       getByYearUnsummed: state.getByYearUnsummed,
       getItemByMonth: monthExpenses,
-      getItemByYearSummed: SingleExpenseItemsSummed(yearExpenses),
+      getItemByYearSummed: itemsSummed(yearExpenses),
       getItemByYearTotal: itemTotal(yearExpenses),
       getYearIncomeByMonth: state.getYearIncomeByMonth,
       getIncomeByMonth: state.getIncomeByMonth,

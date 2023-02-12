@@ -1,18 +1,117 @@
-import { View, Modal, StyleSheet, Dimensions, Alert } from "react-native";
+import { View, Modal, StyleSheet, Dimensions, Alert, Text } from "react-native";
 import { Button, IconButton } from "react-native-paper";
 import { TextInput } from "react-native-paper";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
 import dateFormat from "dateformat";
-import { DatePicker } from "./DatePicker";
+import { Date_Picker } from "./DatePicker";
+import { CurrencyFormatContext } from "../../store/CurrencyFormat";
+import { toCurrency } from "../computations/ToCurrency";
+import { SelectList } from "react-native-dropdown-select-list";
 
 export const AddEditDataModal = (props) => {
+  const currencyCtx = useContext(CurrencyFormatContext);
   const screenWidth = Dimensions.get("window").width;
-  const [item, setItem] = useState("");
+
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [item, setItem] = useState();
+  const [itemError, setItemError] = useState(false);
   const [selectDate, setSelectDate] = useState(new Date());
-  console.log(selectDate);
+  const [amount, setAmount] = useState();
+  const [amountError, setAmountError] = useState(false);
+  const [budget, setBudget] = useState();
+  const [budgetError, setBudgetError] = useState(false);
+  const [type, setType] = useState({});
+  const [typeDefault, setTypeDefault] = useState({});
+  const [typeError, setTypeError] = useState(false);
+  const [description, setDescription] = useState("");
+
+  const typeData = [
+    { key: "0", value: "Select Type", disabled: true },
+    { key: "1", value: "Fixed Expense" },
+    { key: "2", value: "Variable Expense" },
+    { key: "3", value: "Income" },
+  ];
+
+  const selectType = (selType) => {
+    if (selType === "") {
+      return typeData[0];
+    }
+    if (selType === "exp-fixed") {
+      return typeData[1];
+    }
+    if (selType === "exp-variable") {
+      return typeData[2];
+    }
+    if (selType === "income") {
+      return typeData[3];
+    }
+  };
+
+  const typeText = (typeKey) => {
+    if (typeKey === 1) {
+      return "exp-fixed";
+    }
+
+    if (typeKey === 2) {
+      return "exp-variable";
+    }
+
+    if (typeKey === 3) {
+      return "income";
+    }
+  };
+
+  useEffect(() => {
+    setItem(props.data.item);
+    setSelectDate(new Date(props.data.date));
+    setAmount(props.data.amount.toString());
+    setBudget(props.data.limit.toString());
+    setTypeDefault(selectType(props.data.type));
+  }, [props.data]);
 
   const onSubmitHandler = () => {
-    props.modalClose();
+    let error = false;
+    console.log(type);
+    if (item === "") {
+      setItemError(true);
+      error = true;
+    } else {
+      setItemError(false);
+    }
+
+    if (isNaN(amount) || amount === "") {
+      setAmountError(true);
+      error = true;
+    } else {
+      setAmountError(false);
+    }
+
+    if (isNaN(budget) || budget === "") {
+      setBudgetError(true);
+      error = true;
+    } else {
+      setBudgetError(false);
+    }
+
+    if (+type === 0) {
+      setTypeError(true);
+      error = true;
+    } else {
+      setTypeError(false);
+    }
+
+    if (!error) {
+      const savedData = {
+        ID: props.data.ID,
+        item: item,
+        date: selectDate,
+        amount: amount,
+        limit: budget,
+        type: typeText(+type),
+      };
+      props.onDataSubmitted(savedData);
+      props.modalClose();
+    }
   };
 
   const onCancelHandler = () => {
@@ -20,9 +119,27 @@ export const AddEditDataModal = (props) => {
   };
 
   const itemMessage = "Insert type of expense or income";
+  const amountMessage = "Insert item amount";
+  const budgetMessage = "Insert budget limit for the month";
+  const typeMessage =
+    "Fixed Expense: expense occurs once a month. \nVariable Expense: expense occurs mutliple times a month. \nIncome: all incomes for the month.";
+  const descriptionMessage = "Insert description or additional information.";
+  typeMessage.bold;
+  const onHelpPressed = (message, type) => {
+    Alert.alert(type, message);
+  };
 
-  const onHelpPressed = (message) => {
-    Alert.alert("Item", message);
+  const showCalendarHandler = () => {
+    setShowCalendar(true);
+  };
+
+  const onConfirmationHandler = (date) => {
+    setSelectDate(new Date(date));
+    setShowCalendar(false);
+  };
+
+  const onCancellationHandler = () => {
+    setShowCalendar(false);
   };
 
   return (
@@ -30,6 +147,19 @@ export const AddEditDataModal = (props) => {
       <Modal animationType="fade" transparent={true} visible={props.modalShow}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
+            <Date_Picker
+              show={showCalendar}
+              onConfirmation={onConfirmationHandler}
+              onCancellation={onCancellationHandler}
+              setDate={selectDate}
+            />
+            {itemError && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.error}>
+                  Error: Item field must be populated.
+                </Text>
+              </View>
+            )}
             <View style={styles.rowFlex}>
               <TextInput
                 mode={"outlined"}
@@ -37,7 +167,7 @@ export const AddEditDataModal = (props) => {
                 value={item}
                 onChangeText={(item) => setItem(item)}
                 style={{ height: 35, width: screenWidth * 0.6 }}
-                error={false}
+                error={itemError}
                 selectionColor={"blue"}
                 outlineColor={"blue"}
               />
@@ -45,7 +175,7 @@ export const AddEditDataModal = (props) => {
                 icon="help-circle"
                 iconColor={"black"}
                 size={20}
-                onPress={() => onHelpPressed(itemMessage)}
+                onPress={() => onHelpPressed(itemMessage, "ITEM")}
               />
             </View>
             <View style={styles.rowFlex}>
@@ -64,7 +194,105 @@ export const AddEditDataModal = (props) => {
                 icon="calendar-month"
                 iconColor={"black"}
                 size={20}
-                onPress={() => <DatePicker date={new Date()} />}
+                onPress={() => showCalendarHandler()}
+              />
+            </View>
+            {amountError && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.error}>Error: Amount must be numeric.</Text>
+              </View>
+            )}
+            <View style={styles.rowFlex}>
+              <TextInput
+                mode={"outlined"}
+                label="AMOUNT"
+                value={amount}
+                onChangeText={(value) => setAmount(value)}
+                style={{ height: 35, width: screenWidth * 0.6 }}
+                error={amountError}
+                selectionColor={"blue"}
+                outlineColor={"blue"}
+              />
+              <IconButton
+                icon="help-circle"
+                iconColor={"black"}
+                size={20}
+                onPress={() => onHelpPressed(amountMessage, "AMOUNT")}
+              />
+            </View>
+            {budgetError && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.error}>Error: Budget must be numeric.</Text>
+              </View>
+            )}
+            <View style={styles.rowFlex}>
+              <TextInput
+                mode={"outlined"}
+                label="BUDGET"
+                value={budget}
+                onChangeText={(value) => setBudget(value)}
+                style={{ height: 35, width: screenWidth * 0.6 }}
+                error={budgetError}
+                selectionColor={"blue"}
+                outlineColor={"blue"}
+              />
+              <IconButton
+                icon="help-circle"
+                iconColor={"black"}
+                size={20}
+                onPress={() => onHelpPressed(budgetMessage, "BUDGET")}
+              />
+            </View>
+            {typeError && (
+              <View style={styles.errorContainer}>
+                <Text style={styles.error}>Error: Select item type.</Text>
+              </View>
+            )}
+            <View style={styles.rowFlex}>
+              <SelectList
+                setSelected={(val) => setType(val)}
+                data={typeData}
+                save="key"
+                placeholder={"TYPE"}
+                defaultOption={typeDefault}
+                search={false}
+                boxStyles={{
+                  height: 45,
+                  width: screenWidth * 0.6,
+                  borderRadius: 5,
+                  borderColor: typeError ? "red" : "blue",
+                  backgroundColor: "#F5F5F5",
+                }}
+                inputStyles={{ fontSize: 14 }}
+                dropdownStyles={{
+                  borderColor: "blue",
+                  backgroundColor: "#F5F5F5",
+                }}
+              />
+              <IconButton
+                icon="help-circle"
+                iconColor={"black"}
+                size={20}
+                onPress={() => onHelpPressed(typeMessage, "TYPE")}
+              />
+            </View>
+            <View style={styles.rowFlex}>
+              <TextInput
+                mode={"outlined"}
+                label="DESCRIPTION"
+                value={description}
+                onChangeText={(val) => setDescription(val)}
+                style={{ height: 100, width: screenWidth * 0.6, fontSize: 14 }}
+                error={false}
+                selectionColor={"blue"}
+                outlineColor={"blue"}
+                multiline={true}
+              />
+              <IconButton
+                icon="help-circle"
+                iconColor={"black"}
+                size={20}
+                onPress={() => onHelpPressed(descriptionMessage, "DESCRIPTION")}
               />
             </View>
             <View style={styles.rowFlex}>
@@ -117,5 +345,14 @@ const styles = StyleSheet.create({
   rowFlex: {
     flexDirection: "row",
     marginBottom: 10,
+  },
+  errorContainer: {
+    alignSelf: "flex-start",
+    paddingLeft: 25,
+  },
+  error: {
+    fontWeight: "bold",
+    fontSize: 12,
+    color: "red",
   },
 });

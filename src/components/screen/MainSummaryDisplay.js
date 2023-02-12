@@ -11,7 +11,7 @@ import { ExpenseCard } from "../elementaries/cards/ExpenseCard";
 import { mockExpenses, mockIncome } from "./MockData";
 import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { InfoCircularCard } from "../elementaries/cards/InfoCircularCard";
-import { Title } from "react-native-paper";
+import { Title, FAB } from "react-native-paper";
 import { WheelPickerDisplay } from "../modals/WheelPicker";
 import { DateMenu } from "../elementaries/menus/DateMenu";
 import { useContext, useEffect, useState } from "react";
@@ -98,6 +98,13 @@ export const MainSummaryDisplay = ({ navigation }) => {
             contentContainerStyle={{ padding: 5 }}
           />
         </View>
+        <FAB
+          icon="plus"
+          style={styles.fab}
+          color={"black"}
+          small
+          onPress={() => console.log("Pressed")}
+        />
       </ImageBackground>
     </View>
   );
@@ -106,17 +113,18 @@ export const MainSummaryDisplay = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //marginTop: StatusBar.currentHeight,
-    // flexDirection: "column",
-    // flexDirection: "column",
-    // alignItems: "center",
-    // justifyContent: "center",
-    // paddingLeft: 10,
     width: "100%",
   },
   image: {
     flex: 1,
     justifyContent: "center",
+  },
+  fab: {
+    backgroundColor: "white",
+    position: "absolute",
+    margin: 15,
+    right: 0,
+    bottom: 0,
   },
   dateDisplayContainer: {
     flex: 0.05,

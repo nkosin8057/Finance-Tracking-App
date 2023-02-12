@@ -6,9 +6,8 @@ import { useState } from "react";
 export const EditCard = (props) => {
   //const [itemSelected, setItemSelected]=useState(false)
   const onButtonSelectedHandler = () => {
-    //console.log(props.id);
-    props.getID(props.id);
-    props.onButtonSelected();
+    //props.getID(props.id);
+    props.onButtonSelected(props.id);
   };
   return (
     <Card style={styles.cardContainer}>

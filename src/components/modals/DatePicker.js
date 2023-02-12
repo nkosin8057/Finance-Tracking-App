@@ -1,9 +1,24 @@
-import { DayPicker } from "react-day-picker";
-import { useState } from "react";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { View } from "react-native";
 
 export const Date_Picker = (props) => {
-  //const [date, setDate] = useState(new Date(props.date));
+  const onCancelHandler = () => {
+    props.onCancellation();
+  };
 
-  return <DayPicker />;
+  const handleConfirm = (date) => {
+    props.onConfirmation(date);
+  };
+
+  return (
+    <View>
+      <DateTimePickerModal
+        isVisible={props.show}
+        mode="date"
+        date={props.setDate}
+        onConfirm={handleConfirm}
+        onCancel={onCancelHandler}
+      />
+    </View>
+  );
 };
-//mode="single" selected={date} onSelect={setDate}
