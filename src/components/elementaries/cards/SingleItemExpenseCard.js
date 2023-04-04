@@ -1,41 +1,35 @@
-import { Card, Title } from "react-native-paper";
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { Card } from "react-native-paper";
+import { StyleSheet, View, Text } from "react-native";
 import { ShowMoreText } from "../../modals/ShowMoreText";
-import { CurrencyFormatContext } from "../../../store/CurrencyFormat";
-import { toCurrency } from "../../computations/ToCurrency";
-import { useContext } from "react";
-import dateFormat from "dateformat";
 
 export const SingleItemExpenseCard = (props) => {
-  const currencyCtx = useContext(CurrencyFormatContext);
-
-  const item = props.item;
-  const date = dateFormat(new Date(props.date), "dd mmm yy");
-  const amount = toCurrency(+props.amount, currencyCtx.getCurrencyCode);
-  const description = props.description;
-
   return (
     <Card style={styles.cardContainer}>
       <View style={styles.cardViewContainer}>
-        <View style={styles.cardTopContainer}>
-          <Title style={styles.title}>{item}</Title>
-        </View>
-        <View style={styles.cardBottomContainer}>
-          <View style={styles.cardLeftContainer}>
-            <View style={styles.cardDateContainer}>
-              <Text style={styles.text}>{date}</Text>
+        <View style={styles.upperSectionContainer}>
+          <View style={styles.horizontalSectionContainer}>
+            <View style={styles.leftSectionContainer}>
+              <Text style={styles.title}>Item:</Text>
+              <Text style={styles.text}>{props.item}</Text>
             </View>
-            <View style={styles.cardAmountContainer}>
-              <Text style={styles.text}>{amount}</Text>
+            <View style={styles.rightSectionContainer}>
+              <Text style={styles.title}>Date:</Text>
+              <Text style={styles.text}>{props.date}</Text>
             </View>
           </View>
-          <View style={styles.cardRightContainer}>
-            <View style={styles.descriptionTitleContainer}>
-              <Text style={styles.descriptionTitle}>Description</Text>
+        </View>
+        <View style={styles.middleSectionContainer}>
+          <View style={styles.horizontalSectionContainer}>
+            <View style={styles.leftSectionContainer}>
+              <Text style={styles.title}>Amount:</Text>
+              <Text style={styles.text}>{props.amount}</Text>
             </View>
-            <ScrollView style={styles.descriptionContainer}>
-              <ShowMoreText description={description} />
-            </ScrollView>
+          </View>
+        </View>
+        <View style={styles.bottomSectionContainer}>
+          <View style={styles.descriptionSectionContainer}>
+            <Text style={styles.title}>Description:</Text>
+            <ShowMoreText description={props.description} />
           </View>
         </View>
       </View>
@@ -46,77 +40,73 @@ export const SingleItemExpenseCard = (props) => {
 const styles = StyleSheet.create({
   cardContainer: {
     padding: 10,
-    height: 140,
+    height: 180,
     width: "100%",
-    borderWidth: 1,
-    borderColor: "white",
     marginBottom: 25,
     elevation: 3,
-    backgroundColor: "black",
-    opacity: 0.7,
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "white",
   },
   cardViewContainer: {
     flexDirection: "column",
     flex: 1,
   },
-  cardTopContainer: {
+  upperSectionContainer: {
     flex: 0.3,
     width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
   },
-  cardBottomContainer: {
-    flex: 0.7,
+  middleSectionContainer: {
+    flex: 0.3,
+    width: "100%",
+  },
+  bottomSectionContainer: {
+    flex: 0.4,
+    width: "100%",
     flexDirection: "row",
   },
-  cardLeftContainer: {
-    flex: 0.4,
+  descriptionSectionContainer: {
+    flex: 1,
     height: "100%",
   },
-  cardDateContainer: {
-    flex: 0.6,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+  horizontalSectionContainer: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  leftSectionContainer: {
+    flex: 0.5,
+    height: "100%",
+  },
+  rightSectionContainer: {
+    flex: 0.5,
+    height: "100%",
   },
   title: {
-    fontWeight: "bold",
+    fontSize: 12,
+    fontWeight: "400",
+    fontStyle: "italic",
+    textDecorationLine: "underline",
+    textDecorationStyle: "double",
     color: "white",
-  },
-  cardAmountContainer: {
-    flex: 0.4,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    alignSelf: "flex-start",
   },
   text: {
     fontSize: 18,
     fontWeight: "bold",
     color: "white",
+    alignSelf: "center",
+    textShadowColor: "black",
+    textShadowOffset: { width: 5, height: 5 },
+    textShadowRadius: 1,
   },
-  cardRightContainer: {
-    flex: 0.6,
-    height: "100%",
-  },
-  descriptionTitleContainer: {
-    flex: 0.4,
-    height: "100%",
-  },
-  descriptionContainer: {
-    flex: 0.6,
-    height: "100%",
-  },
-  description: {
-    fontSize: 13,
-    //fontWeight: "bold",
-    color: "white",
-    paddingLeft: 10,
-  },
-  descriptionTitle: {
-    fontSize: 15,
+  descripText: {
+    fontSize: 14,
     fontWeight: "bold",
     color: "white",
-    alignSelf: "center",
-    paddingBottom: 5,
+    alignSelf: "flex-start",
+    textShadowColor: "black",
+    textShadowOffset: { width: 5, height: 5 },
+    textShadowRadius: 1,
+    paddingLeft: 5,
   },
 });

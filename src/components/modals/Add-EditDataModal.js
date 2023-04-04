@@ -62,16 +62,21 @@ export const AddEditDataModal = (props) => {
   };
 
   useEffect(() => {
-    setItem(props.data.item);
-    setSelectDate(new Date(props.data.date));
-    setAmount(props.data.amount.toString());
-    setBudget(props.data.limit.toString());
-    setTypeDefault(selectType(props.data.type));
+    if (props.new === true) {
+      setTypeDefault(selectType(""));
+    } else {
+      setItem(props.data.item);
+      setSelectDate(new Date(props.data.date));
+      setAmount(props.data.amount.toString());
+      setBudget(props.data.budget.toString());
+      setTypeDefault(selectType(props.data.type));
+      setDescription(props.data.description);
+    }
   }, [props.data]);
 
   const onSubmitHandler = () => {
     let error = false;
-    console.log(type);
+
     if (item === "") {
       setItemError(true);
       error = true;
@@ -101,14 +106,28 @@ export const AddEditDataModal = (props) => {
     }
 
     if (!error) {
-      const savedData = {
-        ID: props.data.ID,
-        item: item,
-        date: selectDate,
-        amount: amount,
-        limit: budget,
-        type: typeText(+type),
-      };
+      let savedData = {};
+      if (props.ne) {
+        savedData = {
+          item: item,
+          date: selectDate,
+          amount: amount,
+          budget: budget,
+          type: typeText(+type),
+          description: description,
+        };
+      } else {
+        savedData = {
+          id: props.data._id,
+          item: item,
+          date: selectDate,
+          amount: amount,
+          budget: budget,
+          type: typeText(+type),
+          description: description,
+        };
+      }
+
       props.onDataSubmitted(savedData);
       props.modalClose();
     }
@@ -282,7 +301,7 @@ export const AddEditDataModal = (props) => {
                 label="DESCRIPTION"
                 value={description}
                 onChangeText={(val) => setDescription(val)}
-                style={{ height: 100, width: screenWidth * 0.6, fontSize: 14 }}
+                style={{ height: 150, width: screenWidth * 0.6, fontSize: 14 }}
                 error={false}
                 selectionColor={"blue"}
                 outlineColor={"blue"}

@@ -1,4 +1,4 @@
-import { Button, Menu, Divider, Provider } from "react-native-paper";
+import { Button, Menu, Provider } from "react-native-paper";
 import { View } from "react-native";
 import { useState } from "react";
 
@@ -45,7 +45,7 @@ export const DropDownMenu = (props) => {
           {months.map((month) => {
             <Menu.Item
               onPress={() => {
-                console.log("pressed");
+                //console.log("pressed");
               }}
               title={month}
             />;

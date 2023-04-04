@@ -1,6 +1,5 @@
 import { MainSummaryDisplay } from "./MainSummaryDisplay";
 import { SingleItemDisplay } from "./SingleItemDisplay";
-import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 export const HomeScreen = () => {

@@ -6,15 +6,22 @@ import {
   ImageBackground,
   Text,
 } from "react-native";
-import { Title } from "react-native-paper";
 import { MonthContext } from "../../store/MonthProvider";
-import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { LineBarChart } from "../elementaries/charts/LineBar-Chart";
-import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { SingleItemExpenseCard } from "../elementaries/cards/SingleItemExpenseCard";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { toCurrency } from "../computations/ToCurrency";
+import { sumData } from "../computations/SumData";
+import dateFormat from "dateformat";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  Timestamp,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -28,14 +35,45 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-const mockDescription =
-  "Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description";
-
 export const AllItemDisplayMonth = () => {
   const monthCtx = useContext(MonthContext);
-  const incExpCtx = useContext(IncomeExpensesDataContext);
   const currencyCtx = useContext(CurrencyFormatContext);
-  let expenses = [];
+
+  const [data, setData] = useState([]);
+
+  const dbRef = collection(db, "financeData");
+
+  const fetchDataHandler = async (mnth) => {
+    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
+    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+    );
+    onSnapshot(q, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate() };
+      });
+      setData(res);
+    });
+  };
+
+  useEffect(() => {
+    fetchDataHandler(monthCtx.monthDate);
+  }, [monthCtx.monthDate]);
+
+  const expenses = [];
+
+  for (let index = 0; index < data.length; index++) {
+    if (
+      data[index].type === "exp-fixed" ||
+      data[index].type === "exp-variable"
+    ) {
+      expenses.push(data[index]);
+    }
+  }
+  expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const monthEndDay = new Date(
     monthCtx.monthDate.getFullYear(),
@@ -48,14 +86,14 @@ export const AllItemDisplayMonth = () => {
     xVals.push(index);
   }
 
-  expenses = incExpCtx.getByMonthUnsummed;
-
   let yVals = [];
   const budget = [];
+  const income = sumData(data, "income");
+
   xVals.forEach((xElement) => {
     yVals.push(0);
     if (expenses.length > 0) {
-      budget.push(incExpCtx.getIncomeByMonth);
+      budget.push(income);
     }
 
     expenses.forEach((yElement) => {
@@ -79,7 +117,7 @@ export const AllItemDisplayMonth = () => {
   let profitLoss = 0;
 
   if (expenses.length > 0) {
-    profitLoss = incExpCtx.getIncomeByMonth - totalSpent;
+    profitLoss = income - totalSpent;
   }
 
   let lossProfitText = "Profit";
@@ -90,9 +128,9 @@ export const AllItemDisplayMonth = () => {
   const renderItem = ({ item }) => (
     <SingleItemExpenseCard
       item={item.item}
-      date={item.date}
-      amount={item.amount}
-      description={mockDescription}
+      date={dateFormat(new Date(item.date), "dd mmm yy")}
+      amount={toCurrency(item.amount, currencyCtx.getCurrencyCode)}
+      description={item.description}
     />
   );
 
@@ -152,7 +190,7 @@ export const AllItemDisplayMonth = () => {
               <FlatList
                 data={expenses}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.ID}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={{ padding: 5 }}
               />
             </View>

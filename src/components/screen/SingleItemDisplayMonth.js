@@ -8,13 +8,20 @@ import {
 } from "react-native";
 import { Title } from "react-native-paper";
 import { MonthContext } from "../../store/MonthProvider";
-import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { LineBarChart } from "../elementaries/charts/LineBar-Chart";
-import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { SingleItemExpenseCard } from "../elementaries/cards/SingleItemExpenseCard";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { toCurrency } from "../computations/ToCurrency";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  Timestamp,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
+import dateFormat from "dateformat";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -28,15 +35,36 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-const mockDescription =
-  "Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description";
-
-export const SingleItemDisplayMonth = () => {
+export const SingleItemDisplayMonth = (props) => {
   const monthCtx = useContext(MonthContext);
-  const incExpCtx = useContext(IncomeExpensesDataContext);
   const currencyCtx = useContext(CurrencyFormatContext);
+
+  const [expenses, setExpenses] = useState([]);
+
+  const dbRef = collection(db, "financeData");
+
+  const fetchDataHandler = async (mnth) => {
+    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
+    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(mEnd))),
+      where("item", "==", props.props.toString())
+    );
+    onSnapshot(q, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate() };
+      });
+      setExpenses(res);
+    });
+  };
+
+  useEffect(() => {
+    fetchDataHandler(monthCtx.monthDate);
+  }, [monthCtx.monthDate]);
+
   const options = { year: "numeric", month: "short", day: "numeric" };
-  let expenses = [];
 
   const monthEndDay = new Date(
     monthCtx.monthDate.getFullYear(),
@@ -49,14 +77,12 @@ export const SingleItemDisplayMonth = () => {
     xVals.push(index);
   }
 
-  expenses = incExpCtx.getItemByMonth;
-
   let yVals = [];
   let budget = [];
   xVals.forEach((xElement) => {
     yVals.push(0);
     if (expenses.length > 0) {
-      budget.push(expenses[0].limit);
+      budget.push(expenses[0].budget);
     }
 
     expenses.forEach((yElement) => {
@@ -80,7 +106,7 @@ export const SingleItemDisplayMonth = () => {
   let profitLoss = 0;
 
   if (expenses.length > 0) {
-    profitLoss = expenses[0].limit - totalSpent;
+    profitLoss = expenses[0].budget - totalSpent;
   }
 
   let lossProfitText = "Profit";
@@ -91,9 +117,9 @@ export const SingleItemDisplayMonth = () => {
   const renderItem = ({ item }) => (
     <SingleItemExpenseCard
       item={item.item}
-      date={item.date}
-      amount={item.amount}
-      description={mockDescription}
+      date={dateFormat(new Date(item.date), "dd mmm yy")}
+      amount={toCurrency(item.amount, currencyCtx.getCurrencyCode)}
+      description={item.description}
     />
   );
 
@@ -156,7 +182,7 @@ export const SingleItemDisplayMonth = () => {
               <FlatList
                 data={expenses}
                 renderItem={renderItem}
-                keyExtractor={(item) => item.ID}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={{ padding: 5 }}
               />
             </View>
@@ -181,7 +207,6 @@ const styles = StyleSheet.create({
   secondContainer: {
     flex: 1,
     width: "100%",
-    //alignItems: "center",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -193,7 +218,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     alignSelf: "center",
-    //paddingTop: ,
     paddingBottom: 10,
     color: "white",
   },

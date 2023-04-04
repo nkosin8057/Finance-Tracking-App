@@ -1,7 +1,6 @@
 import {
   VictoryBar,
   VictoryChart,
-  VictoryLabel,
   VictoryLegend,
   VictoryAxis,
 } from "victory-native";
@@ -53,7 +52,6 @@ export const BarCandleChart = (props) => {
             }}
           />
           <VictoryAxis
-            //tickValues={props.showValues}
             style={{
               tickLabels: {
                 fontWeight: "bold",

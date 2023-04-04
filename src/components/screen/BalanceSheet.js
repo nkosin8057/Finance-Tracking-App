@@ -1,18 +1,14 @@
 import { DataTable } from "react-native-paper";
-import {
-  StyleSheet,
-  View,
-  Text,
-  StatusBar,
-  ImageBackground,
-} from "react-native";
+import { StyleSheet, View, StatusBar, ImageBackground } from "react-native";
 import { SafeAreaView, ScrollView } from "react-native";
-import { useContext } from "react";
-import { mockData } from "./MockData";
+import { useContext, useState, useEffect } from "react";
 import { MonthContext } from "../../store/MonthProvider";
 import { toCurrency } from "../computations/ToCurrency";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { DateMenu } from "../elementaries/menus/DateMenu";
+import { AppDataContext } from "../../store/AppDataProvider";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../../firebaseConfig";
 
 const createTableData = (data, dt) => {
   const thrMnthDate = new Date(dt.getFullYear(), dt.getMonth() - 3, 1);
@@ -25,7 +21,7 @@ const createTableData = (data, dt) => {
     let thrMnthAve = 0;
     let yaSum = 0;
     let exist = tableData.findIndex((indexData) => {
-      return indexData.item === mockData[i].item;
+      return indexData.item === data[i].item;
     });
 
     let iDate = new Date(
@@ -85,7 +81,7 @@ const createTableData = (data, dt) => {
 
     idIndex += 1;
   }
-  //console.log(tableData);
+
   return tableData;
 };
 
@@ -120,12 +116,29 @@ const sumTotal = (data, item) => {
 export const BalanceSheet = () => {
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
+  const dataCtx = useContext(AppDataContext);
+  const [appData, setAppData] = useState([]);
+  const dbRef = collection(db, "financeData");
   const dt = new Date(
     new Date(monthCtx.monthDate).getFullYear(),
     new Date(monthCtx.monthDate).getMonth(),
     1
   );
-  const tableData = createTableData(mockData, dt);
+
+  const fetchDataHandler = async () => {
+    onSnapshot(dbRef, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate() };
+      });
+      setAppData(res);
+    });
+  };
+
+  useEffect(() => {
+    fetchDataHandler();
+  }, []);
+
+  const tableData = createTableData(appData, dt);
 
   const incomeTotal = sumTotal(tableData, "income");
   const expVariableTotal = sumTotal(tableData, "exp-variable");
@@ -231,7 +244,7 @@ export const BalanceSheet = () => {
                     oddEven += 1;
                   }
                   return (
-                    <DataTable.Row>
+                    <DataTable.Row key={income.id}>
                       <DataTable.Cell
                         style={
                           oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
@@ -314,7 +327,7 @@ export const BalanceSheet = () => {
                     oddEven += 1;
                   }
                   return (
-                    <DataTable.Row>
+                    <DataTable.Row key={expense.id}>
                       <DataTable.Cell
                         style={
                           oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
@@ -396,7 +409,7 @@ export const BalanceSheet = () => {
                     oddEven += 1;
                   }
                   return (
-                    <DataTable.Row>
+                    <DataTable.Row key={expense.id}>
                       <DataTable.Cell
                         style={
                           oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
@@ -478,8 +491,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%",
-    // justifyContent: "center",
-    // alignItems: "center",
     marginTop: StatusBar.currentHeight,
   },
   dateMenu: {
@@ -495,23 +506,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   header: {
-    backgroundColor: "#0A75AD",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
     alignContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.2,
   },
   headerLeft: {
-    backgroundColor: "#0A75AD",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
     alignContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.4,
-    //borderRadius: 15,
   },
   headerText: {
     fontWeight: "bold",
@@ -519,19 +529,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   secondHeader: {
-    backgroundColor: "#3399FF",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.2,
   },
   secondHeaderLeft: {
-    backgroundColor: "#3399FF",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.4,
   },
   secondHeaderText: {
@@ -540,35 +550,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   row1: {
-    backgroundColor: "#82f0de",
+    backgroundColor: "rgba(190, 194, 203, 0.8)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.2,
   },
   rowLeft1: {
-    backgroundColor: "#82f0de",
+    backgroundColor: "rgba(190, 194, 203, 0.8)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.4,
   },
   row2: {
-    backgroundColor: "#afeeee",
+    backgroundColor: "rgba(170, 169, 173, 0.8)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.2,
   },
   rowLeft2: {
-    backgroundColor: "#afeeee",
+    backgroundColor: "rgba(170, 169, 173, 0.8)",
     borderWidth: 0.5,
     borderColor: "white",
     justifyContent: "center",
-    borderRadius: 5,
+    borderRadius: 1,
     flex: 0.4,
   },
   rowText: {

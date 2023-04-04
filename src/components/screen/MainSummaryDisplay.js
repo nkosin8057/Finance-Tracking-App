@@ -1,54 +1,108 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  StatusBar,
-  FlatList,
-  ImageBackground,
-} from "react-native";
+import { StyleSheet, View, FlatList, ImageBackground } from "react-native";
 import { ExpenseCard } from "../elementaries/cards/ExpenseCard";
-import { mockExpenses, mockIncome } from "./MockData";
 import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { InfoCircularCard } from "../elementaries/cards/InfoCircularCard";
 import { Title, FAB } from "react-native-paper";
-import { WheelPickerDisplay } from "../modals/WheelPicker";
 import { DateMenu } from "../elementaries/menus/DateMenu";
 import { useContext, useEffect, useState } from "react";
-import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
 import { MonthContext } from "../../store/MonthProvider";
 import { toCurrency } from "../computations/ToCurrency";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
+import { AddEditDataModal } from "../modals/Add-EditDataModal";
+import { AppDataContext } from "../../store/AppDataProvider";
+import { sumData } from "../computations/SumData";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 
 export const MainSummaryDisplay = ({ navigation }) => {
-  const incExpCtx = useContext(IncomeExpensesDataContext);
+  const dataCtx = useContext(AppDataContext);
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
-  const [name, setName] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState({});
+  const [mnthData, setMnthData] = useState([]);
+
+  const dbRef = collection(db, "financeData");
+
+  const fetchDataHandler = async (mnth) => {
+    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
+    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+    );
+    onSnapshot(q, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate() };
+      });
+      setMnthData(res);
+    });
+  };
 
   useEffect(() => {
-    incExpCtx.setGetByMonth(monthCtx.monthDate);
+    fetchDataHandler(monthCtx.monthDate);
   }, [monthCtx.monthDate]);
 
-  useEffect(() => {
-    incExpCtx.setGetSingleItem(name, monthCtx.monthDate);
-  }, [name]);
+  const incomeSum = sumData(mnthData, "income");
+  const fExpensesSum = sumData(mnthData, "exp-fixed");
+  const vExpensesSum = sumData(mnthData, "exp-variable");
+  const aExpensesSum = sumData(mnthData, "expenses");
+  let expenses = [];
+
+  for (let index = 0; index < mnthData.length; index++) {
+    if (
+      mnthData[index].type === "exp-fixed" ||
+      mnthData[index].type === "exp-variable"
+    ) {
+      expenses.push(mnthData[index]);
+    }
+  }
+
+  const onButtonSelected = (selection) => {
+    navigation.navigate("SingleItem", { item: selection });
+  };
+
+  const modalCloseHandler = () => {
+    setShowModal(false);
+  };
+
+  const onModalButtonSelected = () => {
+    setShowModal(true);
+    const obj = { item: "", amount: 1, limit: 0, type: "", description: "" };
+    setModalData(obj);
+  };
+
+  const onDataSubmitted = async (data) => {
+    await addDoc(dbRef, {
+      id: +dataCtx.maxID + 1,
+      item: data.item,
+      date: Timestamp.fromDate(new Date(data.date)),
+      amount: +data.amount,
+      budget: +data.budget,
+      type: data.type,
+      description: data.description,
+    });
+  };
 
   const renderItem = ({ item }) => (
     <ExpenseCard
       name={item.item}
       amount={item.amount}
-      limit={item.limit}
+      limit={item.budget}
       type={item.type}
-      income={incExpCtx.getIncomeByMonth}
+      income={incomeSum}
       onButtonSelected={onButtonSelected}
     />
   );
-
-  const onButtonSelected = (selection) => {
-    setName(selection);
-    navigation.navigate("SingleItem");
-  };
 
   const image = require("../../../assets/images/money_plant2.jpg");
   return (
@@ -56,43 +110,37 @@ export const MainSummaryDisplay = ({ navigation }) => {
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
         <View style={styles.dateDisplayContainer}>
           <DateMenu />
+          <AddEditDataModal
+            modalShow={showModal}
+            modalClose={modalCloseHandler}
+            new={true}
+            onDataSubmitted={onDataSubmitted}
+          />
         </View>
         <View style={styles.circularDisplayContainer}>
           <InfoCircularCard
             title={"Income"}
-            value={toCurrency(
-              incExpCtx.getIncomeByMonth,
-              currencyCtx.getCurrencyCode
-            )}
+            value={toCurrency(incomeSum, currencyCtx.getCurrencyCode)}
             textColour={"#FFFFFF"}
           />
           <InfoCircularCard
             title={"Fixed Expenses"}
-            value={toCurrency(
-              incExpCtx.getFixedTotalMonth,
-              currencyCtx.getCurrencyCode
-            )}
+            value={toCurrency(fExpensesSum, currencyCtx.getCurrencyCode)}
             textColour={"#FFFFFF"}
           />
           <InfoCircularCard
             title={"Variable Expenses"}
-            value={toCurrency(
-              incExpCtx.getVariableTotalMonth,
-              currencyCtx.getCurrencyCode
-            )}
+            value={toCurrency(vExpensesSum, currencyCtx.getCurrencyCode)}
             textColour={"#FFFFFF"}
           />
         </View>
         <View style={styles.totalSummaryContainer}>
-          <TotalSummaryCard
-            spent={incExpCtx.getTotalByMonth}
-            total={incExpCtx.getIncomeByMonth}
-          />
+          <TotalSummaryCard spent={aExpensesSum} total={incomeSum} />
         </View>
         <View style={styles.listContainer}>
           <Title style={styles.titleText}>EXPENSES</Title>
           <FlatList
-            data={incExpCtx.getByMonthSummed}
+            data={expenses}
             renderItem={renderItem}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ padding: 5 }}
@@ -103,7 +151,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
           style={styles.fab}
           color={"black"}
           small
-          onPress={() => console.log("Pressed")}
+          onPress={() => onModalButtonSelected()}
         />
       </ImageBackground>
     </View>
@@ -128,7 +176,7 @@ const styles = StyleSheet.create({
   },
   dateDisplayContainer: {
     flex: 0.05,
-    marginTop: 10,
+    marginTop: 25,
     alignItems: "center",
     justifyContent: "center",
   },

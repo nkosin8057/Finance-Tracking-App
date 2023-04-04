@@ -6,7 +6,6 @@ import {
   SafeAreaView,
 } from "react-native";
 import { EditCard } from "../elementaries/cards/EditCard";
-import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
 import { MonthContext } from "../../store/MonthProvider";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { useContext, useEffect, useState } from "react";
@@ -14,54 +13,96 @@ import { DateMenu } from "../elementaries/menus/DateMenu";
 import { toCurrency } from "../computations/ToCurrency";
 import dateFormat from "dateformat";
 import { AddEditDataModal } from "../modals/Add-EditDataModal";
-import { Date_Picker } from "../modals/DatePicker";
-import { IconButton } from "react-native-paper";
 import { StatusBar } from "react-native";
-
-const mockDescription =
-  "Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description Description";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  Timestamp,
+  query,
+  where,
+  onSnapshot,
+  updateDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 
 export const EditDisplay = () => {
-  const incExpCtx = useContext(IncomeExpensesDataContext);
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
 
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState({});
 
+  const [mnthData, setMnthData] = useState([]);
+  const dbRef = collection(db, "financeData");
+
+  const fetchDataHandler = async (mnth) => {
+    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
+    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+    );
+    onSnapshot(q, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate(), _id: doc.id };
+      });
+      setMnthData(res);
+    });
+  };
+
   useEffect(() => {
-    incExpCtx.setGetByMonth(monthCtx.monthDate);
+    fetchDataHandler(monthCtx.monthDate);
   }, [monthCtx.monthDate]);
 
   const modalCloseHandler = () => {
     setShowModal(false);
   };
 
-  let data = {};
-  const onButtonSelected = (id) => {
-    //console.log(id);
-    //console.log(incExpCtx.getByMonthUnsummed);
+  const onButtonEditSelected = (id) => {
     setShowModal(true);
-    const d = incExpCtx.getByMonthUnsummed.find(({ ID }) => ID === id);
+    const d = mnthData.find(({ _id }) => _id === id);
     setModalData(d);
+  };
 
-    //console.log(dat);
+  const onButtonDeleteSelected = (id) => {
+    deleteDataHandler(id);
+  };
+
+  const deleteDataHandler = async (id) => {
+    const docRef = doc(db, "financeData", id);
+    await deleteDoc(docRef);
+  };
+
+  const updateDataHandler = async (data) => {
+    const docRef = doc(db, "financeData", data.id);
+    const d = {
+      item: data.item,
+      date: Timestamp.fromDate(new Date(data.date)),
+      amount: +data.amount,
+      budget: +data.limit,
+      type: data.type,
+      description: data.description,
+    };
+    await updateDoc(docRef, data);
   };
 
   const onDataSubmitted = (data) => {
-    console.log(data);
+    updateDataHandler(data);
   };
-  //console.log("data= " + modalData.item);
+
   const renderItem = ({ item }) => (
     <EditCard
-      id={item.ID}
+      id={item._id}
       name={item.item}
       date={dateFormat(new Date(item.date), "dd mmm yy")}
       amount={toCurrency(item.amount, currencyCtx.getCurrencyCode)}
-      budget={toCurrency(item.limit, currencyCtx.getCurrencyCode)}
+      budget={toCurrency(item.budget, currencyCtx.getCurrencyCode)}
       type={item.type}
-      description={mockDescription}
-      onButtonSelected={onButtonSelected}
+      description={item.description}
+      onButtonEditSelected={onButtonEditSelected}
+      onButtonDeleteSelected={onButtonDeleteSelected}
     />
   );
 
@@ -74,6 +115,7 @@ export const EditDisplay = () => {
             {Object.keys(modalData).length !== 0 && (
               <AddEditDataModal
                 modalShow={showModal}
+                new={false}
                 modalClose={modalCloseHandler}
                 data={modalData}
                 onDataSubmitted={onDataSubmitted}
@@ -85,9 +127,9 @@ export const EditDisplay = () => {
         <View style={styles.listContainer}>
           {/* <Title style={styles.titleText}></Title> */}
           <FlatList
-            data={incExpCtx.getByMonthUnsummed}
+            data={mnthData}
             renderItem={renderItem}
-            keyExtractor={(item) => item.ID}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={{ padding: 5 }}
           />
         </View>

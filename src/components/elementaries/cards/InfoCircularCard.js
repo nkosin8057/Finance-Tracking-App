@@ -1,12 +1,5 @@
 import Svg from "react-native-svg";
-import {
-  Text,
-  Defs,
-  Circle,
-  TextPath,
-  ClipPath,
-  Image,
-} from "react-native-svg";
+import { Text, Defs, Circle, TextPath, ClipPath } from "react-native-svg";
 
 export const InfoCircularCard = (props) => {
   const itemTitle = props.title;

@@ -1,8 +1,7 @@
 import { LineBarChart } from "../elementaries/charts/LineBar-Chart";
 import { StyleSheet, View, Text } from "react-native";
 import { MonthContext } from "../../store/MonthProvider";
-import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { SafeAreaView, ImageBackground } from "react-native";
 import { candleStickData } from "../computations/CandleStickData";
 import { BarCandleChart } from "../elementaries/charts/BarCandle-Chart";
@@ -10,6 +9,15 @@ import { Title } from "react-native-paper";
 import dateFormat from "dateformat";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { toCurrency } from "../computations/ToCurrency";
+import { objectItemSum, sumData } from "../computations/SumData";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  Timestamp,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -23,71 +31,104 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-const findBudget = (data, date) => {
-  const budget = Array(12).fill(0);
-  const d = new Date(date);
-
-  data.forEach((element) => {
-    const dt = new Date(element.date);
-    for (let index = 0; index < 12; index++) {
-      if (
-        new Date(d.getFullYear(), d.getMonth() - (11 - index), 1).getTime() ===
-        new Date(dt.getFullYear(), dt.getMonth(), 1).getTime()
-      ) {
-        budget[index] += +element.limit;
+const sumByMonth = (dValues, sumValues) => {
+  let summed = Array(12).fill(0);
+  sumValues.forEach((element) => {
+    for (let index = 0; index < dValues.length; index++) {
+      let dt = new Date(
+        new Date(element.date).getFullYear(),
+        new Date(element.date).getMonth(),
+        1
+      );
+      let d = new Date(dValues[index]);
+      if (d.getTime() === dt.getTime()) {
+        summed[index] += element.amount;
       }
     }
   });
 
-  return budget;
+  return summed;
 };
 
 export const AllItemsDisplayYear = () => {
   const monthCtx = useContext(MonthContext);
-  const incExpCtx = useContext(IncomeExpensesDataContext);
   const currencyCtx = useContext(CurrencyFormatContext);
-  const unsummedExpenses = incExpCtx.getByYearUnsummed;
-  const summedExpenses = incExpCtx.getByYearSummed;
 
-  //const summedBudget = findBudget(unsummedExpenses, monthCtx.monthDate);
+  const setDate = new Date(monthCtx.monthDate);
+  const [data, setData] = useState([]);
+  const dbRef = collection(db, "financeData");
 
-  const income = incExpCtx.getYearIncomeByMonth.map((element) => {
-    return element.amount;
-  });
+  const fetchDataHandler = async (mnth) => {
+    const mStart = new Date(mnth.getFullYear(), mnth.getMonth() - 11, 1);
+    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+    );
+    onSnapshot(q, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate() };
+      });
+      setData(res);
+    });
+  };
 
-  //console.log(income);
+  useEffect(() => {
+    fetchDataHandler(monthCtx.monthDate);
+  }, [monthCtx.monthDate]);
 
-  const xVals = Array(12).fill(0);
+  const income = [];
+  const expenses = [];
+  for (let index = 0; index < data.length; index++) {
+    if (data[index].type === "income") {
+      income.push(data[index]);
+    }
+
+    if (
+      data[index].type === "exp-fixed" ||
+      data[index].type === "exp-variable"
+    ) {
+      expenses.push(data[index]);
+    }
+  }
+  expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+  income.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const expenseSum = sumData(expenses, "expenses");
+  const incomeSum = sumData(income, "income");
+
   const yVals = Array(12).fill(0);
 
-  summedExpenses.forEach((element) => {
-    const dt = new Date(element.date);
-    const d = new Date(monthCtx.monthDate);
-    for (let index = 0; index < 12; index++) {
-      if (
-        new Date(d.getFullYear(), d.getMonth() - (11 - index), 1).getTime() ===
-        new Date(dt.getFullYear(), dt.getMonth(), 1).getTime()
-      ) {
-        xVals[index] = `${dateFormat(dt, "mmm")} ${dateFormat(dt, "yy")}`;
-        yVals[index] += element.amount;
-      }
-    }
-  });
+  let xVals = [];
+  let dVals = [];
 
-  const barValues1 = xyData(xVals, yVals);
-  const budgetValues = xyData(xVals, income);
-  //console.log(barValues1);
+  for (let index = 0; index < 12; index++) {
+    let d = new Date(
+      setDate.getFullYear(),
+      setDate.getMonth() - (11 - index),
+      1
+    );
+    dVals.push(d);
+    xVals.push(`${dateFormat(d, "mmm")} ${dateFormat(d, "yy")}`);
+  }
 
-  const findMax = Math.max(...yVals.concat(income));
+  const summedExpenses = sumByMonth(dVals, expenses);
+  const incomeSummed = sumByMonth(dVals, income);
+
+  const barValues1 = xyData(xVals, summedExpenses);
+  const budgetValues = xyData(xVals, incomeSummed);
+
+  const findMax = Math.max(...summedExpenses.concat(incomeSummed));
   const yMax = findMax + findMax * 0.1;
 
   const showValues = xVals;
-
-  const csData = incExpCtx.getByYearSummed.map((element) => {
+  const sumExp = objectItemSum(expenses);
+  const csData = sumExp.map((element) => {
     return {
       date: new Date(element.date),
       amount: element.amount,
-      budget: element.limit,
+      budget: element.budget,
     };
   });
 
@@ -100,7 +141,7 @@ export const AllItemsDisplayYear = () => {
   const csMax = Math.max(...candleData.map((mValue) => mValue.y));
   const csMin = Math.min(...candleData.map((mValue) => mValue.y));
 
-  const lossProfit = candleData[candleData.length - 1].y;
+  const lossProfit = incomeSum - expenseSum;
 
   let lossProfitText = "Profit";
   if (lossProfit < 0) {
@@ -120,10 +161,7 @@ export const AllItemsDisplayYear = () => {
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
                 Total Spent:
-                {toCurrency(
-                  incExpCtx.getByYearTotal,
-                  currencyCtx.getCurrencyCode
-                )}
+                {toCurrency(expenseSum, currencyCtx.getCurrencyCode)}
               </Text>
               {
                 <Text

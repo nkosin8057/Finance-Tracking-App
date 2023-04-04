@@ -1,13 +1,9 @@
 import * as React from "react";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
-import { StyleSheet, SafeAreaView, ImageBackground, Text } from "react-native";
-import { MainSummaryDisplay } from "./src/components/screen/MainSummaryDisplay";
+import { StyleSheet, SafeAreaView } from "react-native";
 import MonthProvider from "./src/store/MonthProvider";
-import IncomeExpensesDataProvider from "./src/store/IncomeExpensesDataProvider";
+import AppDataProvider from "./src/store/AppDataProvider";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { SingleItemDisplay } from "./src/components/screen/SingleItemDisplay";
-import { Settings } from "./src/components/screen/Settings";
 import CurrencyFormatProvider from "./src/store/CurrencyFormat";
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { HomeScreen } from "./src/components/screen/HomeScreen";
@@ -15,18 +11,16 @@ import { AllItemsDisplay } from "./src/components/screen/AllItemsDisplay";
 import { Ionicons } from "@expo/vector-icons";
 import { EditDisplay } from "./src/components/screen/EditDisplay";
 import { BalanceSheet } from "./src/components/screen/BalanceSheet";
+import { Settings } from "./src/components/screen/Settings";
 
 export default function App() {
-  // const d = new Date(2022, 11, 1).valueOf();
-  // console.log(new Date(d).getMonth());
-
   const Tab = createMaterialBottomTabNavigator();
 
   const image = require("./assets/images/money_plant2.jpg");
   return (
     <SafeAreaView style={styles.container}>
       <MonthProvider>
-        <IncomeExpensesDataProvider>
+        <AppDataProvider>
           <CurrencyFormatProvider>
             <NavigationContainer>
               <Tab.Navigator
@@ -37,7 +31,6 @@ export default function App() {
                 screenOptions={{
                   headerShown: false,
                 }}
-                //translucent navigation bar on Android
               >
                 <Tab.Screen
                   name="Home"
@@ -87,10 +80,20 @@ export default function App() {
                     ),
                   }}
                 />
+                <Tab.Screen
+                  name="Settings"
+                  component={Settings}
+                  options={{
+                    tabBarLabel: "Settings",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons name="md-settings" color={color} size={26} />
+                    ),
+                  }}
+                />
               </Tab.Navigator>
             </NavigationContainer>
           </CurrencyFormatProvider>
-        </IncomeExpensesDataProvider>
+        </AppDataProvider>
       </MonthProvider>
       <ExpoStatusBar style="auto" />
     </SafeAreaView>
@@ -101,6 +104,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "blue",
-    //marginTop: StatusBar.currentHeight,
   },
 });

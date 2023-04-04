@@ -3,6 +3,7 @@ import { WheelPickerDisplay } from "./WheelPicker";
 import { Button } from "react-native-paper";
 import { useContext } from "react";
 import { MonthContext } from "../../store/MonthProvider";
+import { AppDataContext } from "../../store/AppDataProvider";
 
 const months = [
   "Jan",
@@ -21,19 +22,19 @@ const months = [
 
 export const MonthYearPicker = (props) => {
   const monthCtx = useContext(MonthContext);
+  const dataCtx = useContext(AppDataContext);
 
   let year = [];
-  const yearDiff =
-    monthCtx.endMonth.getFullYear() - monthCtx.startMonth.getFullYear() + 1;
 
-  for (let index = 0; index < yearDiff; index++) {
-    year.push(monthCtx.startMonth.getFullYear() + index);
+  const yearDiff = monthCtx.startYear - dataCtx.dataStartYear;
+
+  for (let index = 0; index <= +yearDiff; index++) {
+    year.push(dataCtx.dataStartYear + index);
   }
 
   let monthIndex = monthCtx.monthDate.getMonth();
   const getMonthHandler = (index) => {
     monthIndex = index;
-    console.log(monthIndex);
   };
 
   let yearIndex = year.findIndex((yr) => {
@@ -41,7 +42,6 @@ export const MonthYearPicker = (props) => {
   });
   const getYearHandler = (index) => {
     yearIndex = index;
-    console.log(monthIndex);
   };
 
   const onSubmitHandler = () => {

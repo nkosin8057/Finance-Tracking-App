@@ -1,8 +1,7 @@
 import { LineBarChart } from "../elementaries/charts/LineBar-Chart";
 import { StyleSheet, View, Text } from "react-native";
 import { MonthContext } from "../../store/MonthProvider";
-import { IncomeExpensesDataContext } from "../../store/IncomeExpensesDataProvider";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SafeAreaView, ImageBackground } from "react-native";
 import { candleStickData } from "../computations/CandleStickData";
 import { BarCandleChart } from "../elementaries/charts/BarCandle-Chart";
@@ -11,6 +10,14 @@ import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { toCurrency } from "../computations/ToCurrency";
 import { monthName } from "../computations/MonthName";
 import dateFormat from "dateformat";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  Timestamp,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 
 const xyData = (xData, yData) => {
   let element = [];
@@ -24,12 +31,40 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-export const SingleItemDisplayYear = () => {
+export const SingleItemDisplayYear = (props) => {
   const monthCtx = useContext(MonthContext);
-  const incExpCtx = useContext(IncomeExpensesDataContext);
   const currencyCtx = useContext(CurrencyFormatContext);
-  let expenses = [];
-  expenses = incExpCtx.getItemByYearSummed;
+
+  const [expenses, setExpenses] = useState([]);
+
+  const dbRef = collection(db, "financeData");
+
+  const fetchDataHandler = async (mnth) => {
+    const mStart = new Date(mnth.getFullYear(), mnth.getMonth() - 11, 1);
+    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(mEnd))),
+      where("item", "==", props.props.toString())
+    );
+    onSnapshot(q, (snapshot) => {
+      const res = snapshot.docs.map((doc) => {
+        return { ...doc.data(), date: doc.data().date.toDate() };
+      });
+      setExpenses(res);
+    });
+  };
+
+  useEffect(() => {
+    fetchDataHandler(monthCtx.monthDate);
+  }, [monthCtx.monthDate]);
+
+  expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const expenseSum = expenses.reduce((prev, curr) => {
+    return prev + curr.amount;
+  }, 0);
 
   let xVals = [];
   let yVals = [];
@@ -37,14 +72,13 @@ export const SingleItemDisplayYear = () => {
 
   expenses.forEach((element) => {
     const mnth = monthName(element.date);
-    const yr = element.date.getFullYear().toString().substr(-2);
+    const yr = dateFormat(element.date, "yy");
     xVals.push(`${mnth} ${yr}`);
     yVals.push(element.amount);
-    budget.push(element.limit);
+    budget.push(element.budget);
   });
 
   const barValues1 = xyData(xVals, yVals);
-
   const budgetValues = xyData(xVals, budget);
 
   const findMax = Math.max(...yVals.concat(budget));
@@ -52,24 +86,23 @@ export const SingleItemDisplayYear = () => {
 
   const showValues = xVals;
 
-  const csData = incExpCtx.getItemByYearUnsummed.map((element) => {
+  const csData = expenses.map((element) => {
     return {
       date: new Date(element.date),
       amount: element.amount,
-      budget: element.limit,
+      budget: element.budget,
     };
   });
 
   const candleData = candleStickData(csData, monthCtx.monthDate);
   candleData.forEach((element) => {
-    // const mnth = monthName(element.x.getMonth());
     const mnth = dateFormat(element.x, "mmm");
-    const yr = element.x.getFullYear().toString().substr(-2);
+    const yr = dateFormat(element.x, "yy");
     element.x = `${mnth} ${yr}`;
   });
   const csMax = Math.max(...candleData.map((mValue) => mValue.y));
   const csMin = Math.min(...candleData.map((mValue) => mValue.y));
-  //console.log(incExpCtx.getItemByYearTotal);
+
   const lossProfit = candleData[candleData.length - 1].y;
 
   let lossProfitText = "Profit";
@@ -90,10 +123,7 @@ export const SingleItemDisplayYear = () => {
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
                 Total Spent:
-                {toCurrency(
-                  incExpCtx.getItemByYearTotal,
-                  currencyCtx.getCurrencyCode
-                )}
+                {toCurrency(expenseSum, currencyCtx.getCurrencyCode)}
               </Text>
               {
                 <Text

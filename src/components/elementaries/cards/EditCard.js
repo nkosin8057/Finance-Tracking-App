@@ -1,14 +1,30 @@
 import { Card, Button } from "react-native-paper";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Alert } from "react-native";
 import { ShowMoreText } from "../../modals/ShowMoreText";
-import { useState } from "react";
 
 export const EditCard = (props) => {
-  //const [itemSelected, setItemSelected]=useState(false)
-  const onButtonSelectedHandler = () => {
-    //props.getID(props.id);
-    props.onButtonSelected(props.id);
+  const onButtonEditHandler = () => {
+    props.onButtonEditSelected(props.id);
   };
+
+  const onButtonDeleteHandler = () => {
+    Alert.alert(
+      "Delete Data",
+      "Are you sure you want to delete the selected data?",
+      [
+        {
+          text: "No",
+          onPress: () => null,
+        },
+        { text: "Yes", onPress: () => deleteHandler() },
+      ]
+    );
+  };
+
+  const deleteHandler = () => {
+    props.onButtonDeleteSelected(props.id);
+  };
+
   return (
     <Card style={styles.cardContainer}>
       <View style={styles.cardViewContainer}>
@@ -50,6 +66,20 @@ export const EditCard = (props) => {
             <Text style={styles.title}>Description:</Text>
             <ShowMoreText description={props.description} />
           </View>
+        </View>
+        <View style={styles.bottomButtonSectionContainer}>
+          <View style={styles.buttonSectionContainer}>
+            <Button
+              labelStyle={styles.buttonLabel}
+              style={styles.buttonStyle}
+              icon="delete"
+              mode="outlined"
+              compact="true"
+              onPress={() => onButtonDeleteHandler()}
+            >
+              DELETE
+            </Button>
+          </View>
           <View style={styles.buttonSectionContainer}>
             <Button
               labelStyle={styles.buttonLabel}
@@ -57,7 +87,7 @@ export const EditCard = (props) => {
               icon="pencil"
               mode="outlined"
               compact="true"
-              onPress={() => onButtonSelectedHandler()}
+              onPress={() => onButtonEditHandler()}
             >
               EDIT
             </Button>
@@ -71,7 +101,7 @@ export const EditCard = (props) => {
 const styles = StyleSheet.create({
   cardContainer: {
     padding: 10,
-    height: 220,
+    height: 280,
     width: "100%",
     marginBottom: 25,
     elevation: 3,
@@ -96,19 +126,26 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   bottomSectionContainer: {
-    flex: 0.4,
+    flex: 0.3,
+    width: "100%",
+    flexDirection: "row",
+  },
+  bottomButtonSectionContainer: {
+    flex: 0.1,
     width: "100%",
     flexDirection: "row",
   },
   descriptionSectionContainer: {
-    flex: 0.7,
+    flex: 1,
     height: "100%",
   },
   buttonSectionContainer: {
-    flex: 0.3,
+    flex: 1,
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
+    paddingBottom: 7,
+    paddingTop: 1,
   },
 
   horizontalSectionContainer: {

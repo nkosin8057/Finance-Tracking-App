@@ -5,10 +5,8 @@ import {
   VictoryChart,
   VictoryGroup,
   VictoryLine,
-  VictoryTheme,
   VictoryLegend,
   VictoryAxis,
-  VictoryLabel,
 } from "victory-native";
 
 export const LineBarChart = (props) => {
@@ -55,10 +53,9 @@ export const LineBarChart = (props) => {
       </View>
       <View style={styles.chartContainer}>
         <VictoryChart
-          //minDomain={{ x: 0, y: 0 }}
           maxDomain={{ y: +props.maxValue }}
           width={windowWidth}
-          height={300} //250
+          height={300}
           padding={{ top: 10, bottom: 100, left: 50, right: 20 }}
         >
           <VictoryLegend
@@ -114,7 +111,7 @@ export const LineBarChart = (props) => {
               data={props.budgetValues}
               name={props.legendTitles[0]}
             />
-            {props.showCumulative && (
+            {props.showCumulative === true && (
               <VictoryLine
                 style={{
                   data: {

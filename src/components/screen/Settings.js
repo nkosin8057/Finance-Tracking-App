@@ -26,7 +26,8 @@ export const Settings = () => {
   });
 
   const onSelectHandler = (selection) => {
-    //console.log(data[defaultOptionIndex]);
+    currencyCtx.setCurrencyCode(data[selection].code);
+    //console.log(data[selection].code);
   };
 
   return (
@@ -75,11 +76,6 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     paddingRight: 5,
     marginBottom: 10,
-    // borderTopWidth: 2,
-    // borderBottomWidth: 2,
-    // borderColor: "silver",
-    // height: 70,
-    // width: "90%",
   },
   itemText: {
     fontSize: 20,

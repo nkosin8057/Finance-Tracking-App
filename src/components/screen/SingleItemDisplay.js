@@ -10,7 +10,9 @@ import {
 
 const Tab = createMaterialTopTabNavigator();
 
-export const SingleItemDisplay = () => {
+export const SingleItemDisplay = ({ route }) => {
+  const { params } = route;
+
   const image = require("../../../assets/images/money_jar.jpg");
   return (
     <SafeAreaView style={styles.container}>
@@ -26,8 +28,14 @@ export const SingleItemDisplay = () => {
             },
           }}
         >
-          <Tab.Screen name="Month" component={SingleItemDisplayMonth} />
-          <Tab.Screen name="Year" component={SingleItemDisplayYear} />
+          <Tab.Screen
+            name="Month"
+            children={() => <SingleItemDisplayMonth props={params.item} />}
+          />
+          <Tab.Screen
+            name="Year"
+            children={() => <SingleItemDisplayYear props={params.item} />}
+          />
         </Tab.Navigator>
       </ImageBackground>
     </SafeAreaView>

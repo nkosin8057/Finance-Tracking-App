@@ -1,15 +1,13 @@
-import { Button, IconButton } from "react-native-paper";
+import { IconButton } from "react-native-paper";
 import { Text, StyleSheet, View } from "react-native";
-import { MonthYearPicker } from "../../modals/MonthYearPicker";
 import { useState, useContext } from "react";
 import { MonthContext } from "../../../store/MonthProvider";
-import { IncomeExpensesDataContext } from "../../../store/IncomeExpensesDataProvider";
 import { monthName } from "../../computations/MonthName";
+import { MonthYearPicker } from "../../modals/MonthYearPicker";
 
 export const DateMenu = () => {
   const [showModal, setShowModal] = useState(false);
   const monthCtx = useContext(MonthContext);
-  const incExpCtx = useContext(IncomeExpensesDataContext);
 
   const month = monthName(monthCtx.monthDate);
 
