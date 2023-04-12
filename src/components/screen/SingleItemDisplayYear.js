@@ -110,7 +110,7 @@ export const SingleItemDisplayYear = (props) => {
     lossProfitText = "Loss";
   }
 
-  const image = require("../../../assets/images/money_jar.jpg");
+  const image = require("../../../assets/images/money_plant2.jpg");
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,7 +122,7 @@ export const SingleItemDisplayYear = (props) => {
             </View>
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
-                Total Spent:
+                Total Spent:{" "}
                 {toCurrency(expenseSum, currencyCtx.getCurrencyCode)}
               </Text>
               {
@@ -133,7 +133,7 @@ export const SingleItemDisplayYear = (props) => {
                     fontWeight: "bold",
                   }}
                 >
-                  {lossProfitText}:
+                  {lossProfitText}:{" "}
                   {toCurrency(lossProfit, currencyCtx.getCurrencyCode)}
                 </Text>
               }
@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
     flex: 0.05,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 10,
   },
   totalContainer: {
     flex: 0.1,
@@ -196,11 +197,10 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 2,
     borderColor: "white",
-    backgroundColor: "silver",
-    opacity: 0.7,
+    backgroundColor: "rgba(190, 194, 203, 0.5)",
   },
   text: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "white",
     paddingBottom: 10,
@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
     flex: 0.425,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 15,
   },
   barCandlehart: {
     flex: 0.425,

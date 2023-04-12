@@ -5,7 +5,6 @@ import { useContext, useState, useEffect } from "react";
 import { SafeAreaView, ImageBackground } from "react-native";
 import { candleStickData } from "../computations/CandleStickData";
 import { BarCandleChart } from "../elementaries/charts/BarCandle-Chart";
-import { Title } from "react-native-paper";
 import dateFormat from "dateformat";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { toCurrency } from "../computations/ToCurrency";
@@ -42,7 +41,7 @@ const sumByMonth = (dValues, sumValues) => {
       );
       let d = new Date(dValues[index]);
       if (d.getTime() === dt.getTime()) {
-        summed[index] += element.amount;
+        summed[index] += +element.amount;
       }
     }
   });
@@ -54,8 +53,10 @@ export const AllItemsDisplayYear = () => {
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
 
-  const setDate = new Date(monthCtx.monthDate);
   const [data, setData] = useState([]);
+  const [noData, setNoData] = useState(true);
+
+  const setDate = new Date(monthCtx.monthDate);
   const dbRef = collection(db, "financeData");
 
   const fetchDataHandler = async (mnth) => {
@@ -70,7 +71,12 @@ export const AllItemsDisplayYear = () => {
       const res = snapshot.docs.map((doc) => {
         return { ...doc.data(), date: doc.data().date.toDate() };
       });
-      setData(res);
+      if (res.length === 0) {
+        setNoData(true);
+      } else {
+        setData(res);
+        setNoData(false);
+      }
     });
   };
 
@@ -127,8 +133,8 @@ export const AllItemsDisplayYear = () => {
   const csData = sumExp.map((element) => {
     return {
       date: new Date(element.date),
-      amount: element.amount,
-      budget: element.budget,
+      amount: +element.amount,
+      budget: +element.budget,
     };
   });
 
@@ -148,30 +154,27 @@ export const AllItemsDisplayYear = () => {
     lossProfitText = "Loss";
   }
 
-  const image = require("../../../assets/images/money_jar.jpg");
+  const image = require("../../../assets/images/money_plant2.jpg");
 
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        {summedExpenses.length > 0 && (
+        {!noData && (
           <View style={styles.secondContainer}>
-            <View style={styles.titleContainer}>
-              <Title style={styles.title}>All</Title>
-            </View>
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
-                Total Spent:
+                Total Spent:{" "}
                 {toCurrency(expenseSum, currencyCtx.getCurrencyCode)}
               </Text>
               {
                 <Text
                   style={{
                     color: lossProfit < 0 ? "red" : "green",
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: "bold",
                   }}
                 >
-                  {lossProfitText}:
+                  {lossProfitText}:{" "}
                   {toCurrency(lossProfit, currencyCtx.getCurrencyCode)}
                 </Text>
               }
@@ -179,7 +182,7 @@ export const AllItemsDisplayYear = () => {
             <View style={styles.lineBarChart}>
               <LineBarChart
                 title={"Monthly Spend vs. Income"}
-                legendTitles={["Income", "Monthly"]}
+                legendTitles={["Income", "Expenses"]}
                 barValues1={barValues1}
                 secondaryBars={false}
                 budgetValues={budgetValues}
@@ -199,6 +202,14 @@ export const AllItemsDisplayYear = () => {
                 minValue={Math.min(csMin) - 0.1 * Math.min(csMin)}
               />
             </View>
+          </View>
+        )}
+        {noData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.titleText}>
+              No data retrieved for the selected month. Populate new data or
+              select a different month.
+            </Text>
           </View>
         )}
       </ImageBackground>
@@ -222,11 +233,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  titleContainer: {
-    flex: 0.05,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   totalContainer: {
     flex: 0.1,
     justifyContent: "center",
@@ -234,11 +240,11 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 2,
     borderColor: "white",
-    backgroundColor: "silver",
-    opacity: 0.7,
+    backgroundColor: "rgba(190, 194, 203, 0.5)",
+    marginTop: 15,
   },
   text: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "white",
     paddingBottom: 10,
@@ -251,13 +257,29 @@ const styles = StyleSheet.create({
     color: "white",
   },
   lineBarChart: {
-    flex: 0.425,
+    flex: 0.43,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 15,
   },
   barCandlehart: {
     flex: 0.425,
     justifyContent: "center",
     alignItems: "center",
+  },
+  noDataContainer: {
+    flexDirection: "row",
+    width: "95%",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginLeft: 10,
+  },
+  titleText: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });

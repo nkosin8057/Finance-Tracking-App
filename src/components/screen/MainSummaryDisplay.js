@@ -1,4 +1,12 @@
-import { StyleSheet, View, FlatList, ImageBackground } from "react-native";
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  ImageBackground,
+  Alert,
+  Text,
+} from "react-native";
+import Spinner from "react-native-loading-spinner-overlay";
 import { ExpenseCard } from "../elementaries/cards/ExpenseCard";
 import { TotalSummaryCard } from "../elementaries/cards/TotalSummaryCard";
 import { InfoCircularCard } from "../elementaries/cards/InfoCircularCard";
@@ -26,9 +34,11 @@ export const MainSummaryDisplay = ({ navigation }) => {
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
 
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState({});
   const [mnthData, setMnthData] = useState([]);
+  const [noData, setNoData] = useState(true);
 
   const dbRef = collection(db, "financeData");
 
@@ -40,15 +50,28 @@ export const MainSummaryDisplay = ({ navigation }) => {
       where("date", ">=", Timestamp.fromDate(new Date(mStart))),
       where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
     );
-    onSnapshot(q, (snapshot) => {
-      const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate() };
-      });
-      setMnthData(res);
-    });
+    onSnapshot(
+      q,
+      (snapshot) => {
+        const res = snapshot.docs.map((doc) => {
+          return { ...doc.data(), date: doc.data().date.toDate() };
+        });
+        if (res.length === 0) {
+          setNoData(true);
+        } else {
+          setMnthData(res);
+          setNoData(false);
+        }
+      },
+      (error) => {
+        Alert.alert("", error);
+      }
+    );
+    setLoading(false);
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchDataHandler(monthCtx.monthDate);
   }, [monthCtx.monthDate]);
 
@@ -117,35 +140,53 @@ export const MainSummaryDisplay = ({ navigation }) => {
             onDataSubmitted={onDataSubmitted}
           />
         </View>
+        <Spinner
+          visible={loading}
+          textContent={"Loading..."}
+          textStyle={styles.spinnerTextStyle}
+          overlayColor={"rgba(0, 0, 0, 0.75)"}
+        />
         <View style={styles.circularDisplayContainer}>
           <InfoCircularCard
             title={"Income"}
-            value={toCurrency(incomeSum, currencyCtx.getCurrencyCode)}
+            value={toCurrency(+incomeSum, currencyCtx.getCurrencyCode)}
             textColour={"#FFFFFF"}
           />
           <InfoCircularCard
             title={"Fixed Expenses"}
-            value={toCurrency(fExpensesSum, currencyCtx.getCurrencyCode)}
+            value={toCurrency(+fExpensesSum, currencyCtx.getCurrencyCode)}
             textColour={"#FFFFFF"}
           />
           <InfoCircularCard
             title={"Variable Expenses"}
-            value={toCurrency(vExpensesSum, currencyCtx.getCurrencyCode)}
+            value={toCurrency(+vExpensesSum, currencyCtx.getCurrencyCode)}
             textColour={"#FFFFFF"}
           />
         </View>
-        <View style={styles.totalSummaryContainer}>
-          <TotalSummaryCard spent={aExpensesSum} total={incomeSum} />
-        </View>
-        <View style={styles.listContainer}>
-          <Title style={styles.titleText}>EXPENSES</Title>
-          <FlatList
-            data={expenses}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 5 }}
-          />
-        </View>
+        {!noData && (
+          <View style={styles.totalSummaryContainer}>
+            <TotalSummaryCard spent={aExpensesSum} total={incomeSum} />
+          </View>
+        )}
+        {!noData && (
+          <View style={styles.listContainer}>
+            <Title style={styles.titleText}>EXPENSES</Title>
+            <FlatList
+              data={expenses}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ padding: 5 }}
+            />
+          </View>
+        )}
+        {noData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.titleText}>
+              No data retrieved for the selected month. Populate new data or
+              select a different month.
+            </Text>
+          </View>
+        )}
         <FAB
           icon="plus"
           style={styles.fab}
@@ -174,6 +215,9 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
   dateDisplayContainer: {
     flex: 0.05,
     marginTop: 25,
@@ -196,6 +240,14 @@ const styles = StyleSheet.create({
   listContainer: {
     width: "100%",
     flex: 0.55,
+  },
+  noDataContainer: {
+    flexDirection: "row",
+    width: "95%",
+    flex: 0.75,
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginLeft: 10,
   },
   titleText: {
     fontSize: 25,

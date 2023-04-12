@@ -53,9 +53,6 @@ export const Settings = () => {
             dropdownStyles={{ width: 200 }}
           />
         </View>
-        <View style={styles.item}>
-          <Text style={styles.itemText}>Month Period:</Text>
-        </View>
       </View>
     </View>
   );
@@ -66,7 +63,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "rgba(190, 194, 203, 0.9)",
   },
   item: {
     width: "100%",
@@ -83,10 +80,10 @@ const styles = StyleSheet.create({
   },
   secondContainer: {
     flex: 1,
-    width: "100%",
+    width: "90%",
     alignItems: "center",
     marginTop: StatusBar.currentHeight,
-    backgroundColor: "white",
+    backgroundColor: "rgba(190, 194, 203, 0.9)",
   },
   title: {
     fontSize: 26,

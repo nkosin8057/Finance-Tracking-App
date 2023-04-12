@@ -1,22 +1,16 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { SingleItemDisplayMonth } from "./SingleItemDisplayMonth";
 import { SingleItemDisplayYear } from "./SingleItemDisplayYear";
-import {
-  StyleSheet,
-  ImageBackground,
-  SafeAreaView,
-  StatusBar,
-} from "react-native";
+import { StyleSheet, SafeAreaView, StatusBar, View } from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 
 export const SingleItemDisplay = ({ route }) => {
   const { params } = route;
 
-  const image = require("../../../assets/images/money_jar.jpg");
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+      <View style={styles.backgroundContainer}>
         <Tab.Navigator
           initialRouteName="Month"
           screenOptions={{
@@ -37,7 +31,7 @@ export const SingleItemDisplay = ({ route }) => {
             children={() => <SingleItemDisplayYear props={params.item} />}
           />
         </Tab.Navigator>
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 };
@@ -47,10 +41,12 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
+    backgroundColor: "black",
   },
-  image: {
+  backgroundContainer: {
     flex: 1,
     justifyContent: "center",
     width: "100%",
+    backgroundColor: "rgba(190, 194, 203, 0.6)",
   },
 });

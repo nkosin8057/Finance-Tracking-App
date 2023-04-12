@@ -1,5 +1,11 @@
 import { DataTable } from "react-native-paper";
-import { StyleSheet, View, StatusBar, ImageBackground } from "react-native";
+import {
+  StyleSheet,
+  View,
+  StatusBar,
+  ImageBackground,
+  Text,
+} from "react-native";
 import { SafeAreaView, ScrollView } from "react-native";
 import { useContext, useState, useEffect } from "react";
 import { MonthContext } from "../../store/MonthProvider";
@@ -116,8 +122,10 @@ const sumTotal = (data, item) => {
 export const BalanceSheet = () => {
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
-  const dataCtx = useContext(AppDataContext);
+
   const [appData, setAppData] = useState([]);
+  const [noData, setNoData] = useState(true);
+
   const dbRef = collection(db, "financeData");
   const dt = new Date(
     new Date(monthCtx.monthDate).getFullYear(),
@@ -130,7 +138,12 @@ export const BalanceSheet = () => {
       const res = snapshot.docs.map((doc) => {
         return { ...doc.data(), date: doc.data().date.toDate() };
       });
-      setAppData(res);
+      if (res.length === 0) {
+        setNoData(true);
+      } else {
+        setAppData(res);
+        setNoData(false);
+      }
     });
   };
 
@@ -168,52 +181,311 @@ export const BalanceSheet = () => {
         <View style={styles.dateMenu}>
           <DateMenu />
         </View>
-        <View style={styles.table}>
-          <ScrollView>
-            <DataTable>
-              <DataTable.Header style={{ height: 70 }}>
-                <DataTable.Title
-                  textStyle={styles.headerText}
-                  style={styles.headerLeft}
-                >
-                  Item
-                </DataTable.Title>
-                <DataTable.Title
-                  numberOfLines={2}
-                  textStyle={styles.headerText}
-                  style={styles.header}
-                >
-                  Current Month
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.headerText}
-                  style={styles.header}
-                  numberOfLines={2}
-                >
-                  3 months Average
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.headerText}
-                  style={styles.header}
-                  numberOfLines={2}
-                >
-                  Year Sum
-                </DataTable.Title>
-              </DataTable.Header>
+        {noData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.titleText}>
+              No data retrieved for the selected month. Populate new data or
+              select a different month.
+            </Text>
+          </View>
+        )}
+        {!noData && (
+          <View style={styles.table}>
+            <ScrollView>
+              <DataTable>
+                <DataTable.Header style={{ height: 70 }}>
+                  <DataTable.Title
+                    textStyle={styles.headerText}
+                    style={styles.headerLeft}
+                  >
+                    Item
+                  </DataTable.Title>
+                  <DataTable.Title
+                    numberOfLines={2}
+                    textStyle={styles.headerText}
+                    style={styles.header}
+                  >
+                    Current Month
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.headerText}
+                    style={styles.header}
+                    numberOfLines={2}
+                  >
+                    3 months Average
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.headerText}
+                    style={styles.header}
+                    numberOfLines={2}
+                  >
+                    Year Sum
+                  </DataTable.Title>
+                </DataTable.Header>
+
+                <DataTable.Header>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeaderLeft}
+                  >
+                    Total Income
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      incomeTotal.curMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      incomeTotal.thrMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      incomeTotal.twelveMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                </DataTable.Header>
+
+                {tableData
+                  .filter((type) => type.type === "income")
+                  .map((income) => {
+                    {
+                      oddEven += 1;
+                    }
+                    return (
+                      <DataTable.Row key={income.id}>
+                        <DataTable.Cell
+                          style={
+                            oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
+                          }
+                          textStyle={styles.rowText}
+                          key={income.id}
+                        >
+                          {income.item}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            income.curMnth,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            income.thrMnthAv,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            income.yearSum,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    );
+                  })}
+
+                <DataTable.Header>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeaderLeft}
+                  >
+                    Variable Expenses
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      expVariableTotal.curMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      expVariableTotal.thrMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      expVariableTotal.twelveMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                </DataTable.Header>
+                {tableData
+                  .filter((type) => type.type === "exp-variable")
+                  .map((expense) => {
+                    {
+                      oddEven += 1;
+                    }
+                    return (
+                      <DataTable.Row key={expense.id}>
+                        <DataTable.Cell
+                          style={
+                            oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
+                          }
+                          textStyle={styles.rowText}
+                          key={expense.id}
+                        >
+                          {expense.item}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            expense.curMnth,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            expense.thrMnthAv,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            expense.yearSum,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    );
+                  })}
+                <DataTable.Header>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeaderLeft}
+                  >
+                    Fixed Expenses
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      expFixedTotal.curMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      expFixedTotal.thrMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                  <DataTable.Title
+                    textStyle={styles.secondHeaderText}
+                    style={styles.secondHeader}
+                  >
+                    {toCurrency(
+                      expFixedTotal.twelveMnthSum,
+                      currencyCtx.getCurrencyCode
+                    )}
+                  </DataTable.Title>
+                </DataTable.Header>
+                {tableData
+                  .filter((type) => type.type === "exp-fixed")
+                  .map((expense) => {
+                    {
+                      oddEven += 1;
+                    }
+                    return (
+                      <DataTable.Row key={expense.id}>
+                        <DataTable.Cell
+                          style={
+                            oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
+                          }
+                          textStyle={styles.rowText}
+                          key={expense.id}
+                        >
+                          {expense.item}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            expense.curMnth,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            expense.thrMnthAv,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                        <DataTable.Cell
+                          style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
+                          textStyle={styles.rowText}
+                        >
+                          {toCurrency(
+                            expense.yearSum,
+                            currencyCtx.getCurrencyCode
+                          )}
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    );
+                  })}
+              </DataTable>
 
               <DataTable.Header>
                 <DataTable.Title
                   textStyle={styles.secondHeaderText}
                   style={styles.secondHeaderLeft}
                 >
-                  Total Income
+                  Grand Total
                 </DataTable.Title>
                 <DataTable.Title
                   textStyle={styles.secondHeaderText}
                   style={styles.secondHeader}
                 >
                   {toCurrency(
-                    incomeTotal.curMnthSum,
+                    grandTotal.curMnthSum,
                     currencyCtx.getCurrencyCode
                   )}
                 </DataTable.Title>
@@ -222,7 +494,7 @@ export const BalanceSheet = () => {
                   style={styles.secondHeader}
                 >
                   {toCurrency(
-                    incomeTotal.thrMnthSum,
+                    grandTotal.thrMnthSum,
                     currencyCtx.getCurrencyCode
                   )}
                 </DataTable.Title>
@@ -231,257 +503,14 @@ export const BalanceSheet = () => {
                   style={styles.secondHeader}
                 >
                   {toCurrency(
-                    incomeTotal.twelveMnthSum,
-                    currencyCtx.getCurrencyCode
-                  )}
-                </DataTable.Title>
-              </DataTable.Header>
-
-              {tableData
-                .filter((type) => type.type === "income")
-                .map((income) => {
-                  {
-                    oddEven += 1;
-                  }
-                  return (
-                    <DataTable.Row key={income.id}>
-                      <DataTable.Cell
-                        style={
-                          oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
-                        }
-                        textStyle={styles.rowText}
-                        key={income.id}
-                      >
-                        {income.item}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          income.curMnth,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          income.thrMnthAv,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          income.yearSum,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                    </DataTable.Row>
-                  );
-                })}
-
-              <DataTable.Header>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeaderLeft}
-                >
-                  Variable Expenses
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeader}
-                >
-                  {toCurrency(
-                    expVariableTotal.curMnthSum,
-                    currencyCtx.getCurrencyCode
-                  )}
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeader}
-                >
-                  {toCurrency(
-                    expVariableTotal.thrMnthSum,
-                    currencyCtx.getCurrencyCode
-                  )}
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeader}
-                >
-                  {toCurrency(
-                    expVariableTotal.twelveMnthSum,
+                    grandTotal.twelveMnthSum,
                     currencyCtx.getCurrencyCode
                   )}
                 </DataTable.Title>
               </DataTable.Header>
-              {tableData
-                .filter((type) => type.type === "exp-variable")
-                .map((expense) => {
-                  {
-                    oddEven += 1;
-                  }
-                  return (
-                    <DataTable.Row key={expense.id}>
-                      <DataTable.Cell
-                        style={
-                          oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
-                        }
-                        textStyle={styles.rowText}
-                        key={expense.id}
-                      >
-                        {expense.item}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          expense.curMnth,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          expense.thrMnthAv,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          expense.yearSum,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                    </DataTable.Row>
-                  );
-                })}
-              <DataTable.Header>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeaderLeft}
-                >
-                  Fixed Expenses
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeader}
-                >
-                  {toCurrency(
-                    expFixedTotal.curMnthSum,
-                    currencyCtx.getCurrencyCode
-                  )}
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeader}
-                >
-                  {toCurrency(
-                    expFixedTotal.thrMnthSum,
-                    currencyCtx.getCurrencyCode
-                  )}
-                </DataTable.Title>
-                <DataTable.Title
-                  textStyle={styles.secondHeaderText}
-                  style={styles.secondHeader}
-                >
-                  {toCurrency(
-                    expFixedTotal.twelveMnthSum,
-                    currencyCtx.getCurrencyCode
-                  )}
-                </DataTable.Title>
-              </DataTable.Header>
-              {tableData
-                .filter((type) => type.type === "exp-fixed")
-                .map((expense) => {
-                  {
-                    oddEven += 1;
-                  }
-                  return (
-                    <DataTable.Row key={expense.id}>
-                      <DataTable.Cell
-                        style={
-                          oddEven % 2 == 0 ? styles.rowLeft1 : styles.rowLeft2
-                        }
-                        textStyle={styles.rowText}
-                        key={expense.id}
-                      >
-                        {expense.item}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          expense.curMnth,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          expense.thrMnthAv,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                      <DataTable.Cell
-                        style={oddEven % 2 == 0 ? styles.row1 : styles.row2}
-                        textStyle={styles.rowText}
-                      >
-                        {toCurrency(
-                          expense.yearSum,
-                          currencyCtx.getCurrencyCode
-                        )}
-                      </DataTable.Cell>
-                    </DataTable.Row>
-                  );
-                })}
-            </DataTable>
-
-            <DataTable.Header>
-              <DataTable.Title
-                textStyle={styles.secondHeaderText}
-                style={styles.secondHeaderLeft}
-              >
-                Grand Total
-              </DataTable.Title>
-              <DataTable.Title
-                textStyle={styles.secondHeaderText}
-                style={styles.secondHeader}
-              >
-                {toCurrency(grandTotal.curMnthSum, currencyCtx.getCurrencyCode)}
-              </DataTable.Title>
-              <DataTable.Title
-                textStyle={styles.secondHeaderText}
-                style={styles.secondHeader}
-              >
-                {toCurrency(grandTotal.thrMnthSum, currencyCtx.getCurrencyCode)}
-              </DataTable.Title>
-              <DataTable.Title
-                textStyle={styles.secondHeaderText}
-                style={styles.secondHeader}
-              >
-                {toCurrency(
-                  grandTotal.twelveMnthSum,
-                  currencyCtx.getCurrencyCode
-                )}
-              </DataTable.Title>
-            </DataTable.Header>
-          </ScrollView>
-        </View>
+            </ScrollView>
+          </View>
+        )}
       </SafeAreaView>
     </ImageBackground>
   );
@@ -585,5 +614,20 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: "black",
     fontSize: 12,
+  },
+  noDataContainer: {
+    flexDirection: "row",
+    width: "95%",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginLeft: 10,
+  },
+  titleText: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });

@@ -4,6 +4,7 @@ import {
   StyleSheet,
   FlatList,
   SafeAreaView,
+  Text,
 } from "react-native";
 import { EditCard } from "../elementaries/cards/EditCard";
 import { MonthContext } from "../../store/MonthProvider";
@@ -32,8 +33,9 @@ export const EditDisplay = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState({});
-
   const [mnthData, setMnthData] = useState([]);
+  const [noData, setNoData] = useState(true);
+
   const dbRef = collection(db, "financeData");
 
   const fetchDataHandler = async (mnth) => {
@@ -48,7 +50,12 @@ export const EditDisplay = () => {
       const res = snapshot.docs.map((doc) => {
         return { ...doc.data(), date: doc.data().date.toDate(), _id: doc.id };
       });
-      setMnthData(res);
+      if (res.length === 0) {
+        setNoData(true);
+      } else {
+        setMnthData(res);
+        setNoData(false);
+      }
     });
   };
 
@@ -110,29 +117,40 @@ export const EditDisplay = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        <View style={styles.dateDisplayContainer}>
-          <View style={styles.modalContainer}>
-            {Object.keys(modalData).length !== 0 && (
-              <AddEditDataModal
-                modalShow={showModal}
-                new={false}
-                modalClose={modalCloseHandler}
-                data={modalData}
-                onDataSubmitted={onDataSubmitted}
-              />
-            )}
+        {!noData && (
+          <View style={styles.dateDisplayContainer}>
+            <View style={styles.modalContainer}>
+              {Object.keys(modalData).length !== 0 && (
+                <AddEditDataModal
+                  modalShow={showModal}
+                  new={false}
+                  modalClose={modalCloseHandler}
+                  data={modalData}
+                  onDataSubmitted={onDataSubmitted}
+                />
+              )}
+            </View>
+            <DateMenu />
           </View>
-          <DateMenu />
-        </View>
-        <View style={styles.listContainer}>
-          {/* <Title style={styles.titleText}></Title> */}
-          <FlatList
-            data={mnthData}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 5 }}
-          />
-        </View>
+        )}
+        {!noData && (
+          <View style={styles.listContainer}>
+            <FlatList
+              data={mnthData}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ padding: 5 }}
+            />
+          </View>
+        )}
+        {noData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.titleText}>
+              No data retrieved for the selected month. Populate new data or
+              select a different month.
+            </Text>
+          </View>
+        )}
       </ImageBackground>
     </SafeAreaView>
   );
@@ -160,5 +178,20 @@ const styles = StyleSheet.create({
     width: "100%",
     flex: 0.9,
     marginTop: 35,
+  },
+  noDataContainer: {
+    flexDirection: "row",
+    width: "95%",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginLeft: 10,
+  },
+  titleText: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });

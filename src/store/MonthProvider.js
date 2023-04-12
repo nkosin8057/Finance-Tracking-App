@@ -1,6 +1,5 @@
 import React from "react";
 import { useReducer } from "react";
-import { mockData } from "../components/screen/MockData";
 
 const tDay = new Date();
 

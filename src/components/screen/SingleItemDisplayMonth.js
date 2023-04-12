@@ -134,7 +134,7 @@ export const SingleItemDisplayMonth = (props) => {
   const findMax = Math.max(...cumSum.concat(yVals, budget));
   const yMax = findMax + findMax * 0.1;
 
-  const image = require("../../../assets/images/money_jar.jpg");
+  const image = require("../../../assets/images/money_plant2.jpg");
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,7 +146,7 @@ export const SingleItemDisplayMonth = (props) => {
             </View>
             <View style={styles.totalSummaryContainer}>
               <Text style={styles.text}>
-                Total Spent:
+                Total Spent:{" "}
                 {toCurrency(totalSpent, currencyCtx.getCurrencyCode)}
               </Text>
               {
@@ -157,7 +157,7 @@ export const SingleItemDisplayMonth = (props) => {
                     fontWeight: "bold",
                   }}
                 >
-                  {lossProfitText}:
+                  {lossProfitText}:{" "}
                   {toCurrency(profitLoss, currencyCtx.getCurrencyCode)}
                 </Text>
               }
@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
     flex: 0.05,
     ustifyContent: "center",
     alignItems: "center",
+    marginTop: 10,
   },
   title: {
     fontSize: 28,
@@ -228,17 +229,17 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 2,
     borderColor: "white",
-    backgroundColor: "silver",
-    opacity: 0.7,
+    backgroundColor: "rgba(190, 194, 203, 0.5)",
   },
   text: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "white",
     paddingBottom: 10,
   },
   chartContainer: {
     flex: 0.45,
+    marginTop: 15,
   },
   listContainer: {
     flex: 0.4,

@@ -26,8 +26,8 @@ export default function App() {
               <Tab.Navigator
                 initialRouteName="Home"
                 activeColor="white"
-                inactiveColor="grey"
-                barStyle={{ backgroundColor: "silver" }}
+                inactiveColor="black"
+                barStyle={{ backgroundColor: "rgba(190, 194, 203, 0.7)" }}
                 screenOptions={{
                   headerShown: false,
                 }}

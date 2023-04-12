@@ -6,15 +6,15 @@ import {
   ImageBackground,
   SafeAreaView,
   StatusBar,
+  View,
 } from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 
 export const AllItemsDisplay = () => {
-  const image = require("../../../assets/images/money_jar.jpg");
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground source={image} resizeMode="cover" style={styles.image}>
+      <View style={styles.backgroundContainer}>
         <Tab.Navigator
           initialRouteName="Month"
           screenOptions={{
@@ -29,7 +29,7 @@ export const AllItemsDisplay = () => {
           <Tab.Screen name="Month" component={AllItemDisplayMonth} />
           <Tab.Screen name="Year" component={AllItemsDisplayYear} />
         </Tab.Navigator>
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 };
@@ -39,10 +39,12 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     alignItems: "center",
+    backgroundColor: "black",
   },
-  image: {
+  backgroundContainer: {
     flex: 1,
     justifyContent: "center",
     width: "100%",
+    backgroundColor: "rgba(190, 194, 203, 0.6)",
   },
 });

@@ -40,6 +40,7 @@ export const AllItemDisplayMonth = () => {
   const currencyCtx = useContext(CurrencyFormatContext);
 
   const [data, setData] = useState([]);
+  const [noData, setNoData] = useState(true);
 
   const dbRef = collection(db, "financeData");
 
@@ -55,7 +56,12 @@ export const AllItemDisplayMonth = () => {
       const res = snapshot.docs.map((doc) => {
         return { ...doc.data(), date: doc.data().date.toDate() };
       });
-      setData(res);
+      if (res.length === 0) {
+        setNoData(true);
+      } else {
+        setData(res);
+        setNoData(false);
+      }
     });
   };
 
@@ -145,12 +151,12 @@ export const AllItemDisplayMonth = () => {
   const findMax = Math.max(...cumSum.concat(yVals, budget));
   const yMax = findMax + findMax * 0.1;
 
-  const image = require("../../../assets/images/money_jar.jpg");
+  const image = require("../../../assets/images/money_plant2.jpg");
 
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        {expenses.length > 0 && (
+        {!noData && (
           <View style={styles.secondContainer}>
             <View style={styles.totalSummaryContainer}>
               <Text style={styles.text}>
@@ -196,6 +202,14 @@ export const AllItemDisplayMonth = () => {
             </View>
           </View>
         )}
+        {noData && (
+          <View style={styles.noDataContainer}>
+            <Text style={styles.titleText}>
+              No data retrieved for the selected month. Populate new data or
+              select a different month.
+            </Text>
+          </View>
+        )}
       </ImageBackground>
     </SafeAreaView>
   );
@@ -215,7 +229,6 @@ const styles = StyleSheet.create({
   secondContainer: {
     flex: 1,
     width: "100%",
-    //alignItems: "center",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -226,8 +239,7 @@ const styles = StyleSheet.create({
     width: "90%",
     borderWidth: 2,
     borderColor: "white",
-    backgroundColor: "silver",
-    opacity: 0.7,
+    backgroundColor: "rgba(190, 194, 203, 0.5)",
     marginTop: 15,
   },
   text: {
@@ -242,5 +254,20 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 0.45,
     width: "100%",
+  },
+  noDataContainer: {
+    flexDirection: "row",
+    width: "95%",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginLeft: 10,
+  },
+  titleText: {
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });
