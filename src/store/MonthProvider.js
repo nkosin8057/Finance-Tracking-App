@@ -4,38 +4,61 @@ import { useReducer } from "react";
 const tDay = new Date();
 
 export const MonthContext = React.createContext({
+  dayPeriodStart: "",
   monthDate: "",
-  endMonth: "",
-  startMonth: "",
   startYear: "",
+  periodStart: "",
+  periodEnd: "",
   setMonth: (month) => {},
   setYear: (year) => {},
+  setDay: (day) => {},
 });
 
 const defaultState = {
+  dayPeriodStart: 1,
   monthDate: tDay,
-  endMonth: new Date(tDay.getFullYear(), tDay.getMonth() + 1, 0),
-  startMonth: new Date(tDay.getFullYear(), tDay.getMonth(), 1),
   startYear: tDay.getFullYear(),
+  periodStart: new Date(tDay.getFullYear(), tDay.getMonth(), 1),
+  periodEnd: new Date(tDay.getFullYear(), tDay.getMonth() + 1, 0),
 };
 
 const monthReducer = (state, action) => {
   if (action.type === "SET_MONTH") {
     const d = new Date(action.month);
     return {
+      dayPeriodStart: state.dayPeriodStart,
       monthDate: d,
-      endMonth: new Date(d.getFullYear(), d.getMonth() + 1, 0),
-      startMonth: new Date(d.getFullYear(), d.getMonth(), 1),
       startYear: state.startYear,
+      periodStart: new Date(d.getFullYear(), d.getMonth() - 1, d.getDate()),
+      periodEnd: new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1),
     };
   }
 
   if (action.type === "SET_YEAR") {
     return {
+      dayPeriodStart: state.dayPeriodStart,
       monthDate: state.monthDate,
-      endMonth: state.endMonth,
-      startMonth: state.startMonth,
       startYear: action.year,
+      periodStart: state.periodStart,
+      periodEnd: state.periodEnd,
+    };
+  }
+
+  if (action.type === "SET_DAY") {
+    return {
+      dayPeriodStart: +action.day,
+      monthDate: state.monthDate,
+      startYear: state.startYear,
+      periodStart: new Date(
+        state.monthDate.getFullYear(),
+        state.monthDate.getMonth() - 1,
+        +action.day
+      ),
+      periodEnd: new Date(
+        state.monthDate.getFullYear(),
+        state.monthDate.getMonth(),
+        +action.day - 1
+      ),
     };
   }
 
@@ -56,13 +79,19 @@ const MonthProvider = (props) => {
     dispatchMonthAction({ type: "SET_YEAR", year: year });
   };
 
+  const setDayHandler = (day) => {
+    dispatchMonthAction({ type: "SET_DAY", day: day });
+  };
+
   const monthCotext = {
     monthDate: monthState.monthDate,
-    startMonth: monthState.startMonth,
-    endMonth: monthState.endMonth,
+    dayPeriodStart: monthState.dayPeriodStart,
     startYear: monthState.startYear,
+    periodStart: monthState.periodStart,
+    periodEnd: monthState.periodEnd,
     setMonth: setMonthHandler,
     setYear: setYearHandler,
+    setDay: setDayHandler,
   };
 
   return (

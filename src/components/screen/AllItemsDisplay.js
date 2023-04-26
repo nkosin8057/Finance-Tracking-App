@@ -1,13 +1,7 @@
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { AllItemDisplayMonth } from "./AllItemsDisplayMonth";
 import { AllItemsDisplayYear } from "./AllItemsDisplayYear";
-import {
-  StyleSheet,
-  ImageBackground,
-  SafeAreaView,
-  StatusBar,
-  View,
-} from "react-native";
+import { StyleSheet, SafeAreaView, StatusBar, View } from "react-native";
 
 const Tab = createMaterialTopTabNavigator();
 

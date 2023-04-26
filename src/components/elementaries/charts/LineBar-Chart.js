@@ -80,7 +80,6 @@ export const LineBarChart = (props) => {
           <VictoryAxis
             label={props.axisName}
             tickValues={props.showValues}
-            //padding={{ top: 20, bottom: 60 }}
             style={{
               tickLabels: {
                 fontWeight: "bold",
@@ -126,7 +125,6 @@ export const LineBarChart = (props) => {
                 animate={{
                   duration: 3000,
                   easing: "bounce",
-                  //onLoad: { duration: 3000 },
                 }}
               />
             )}
@@ -138,7 +136,6 @@ export const LineBarChart = (props) => {
               animate={{
                 duration: 3000,
                 easing: "bounce",
-                //onLoad: { duration: 3000 },
               }}
             />
           </VictoryGroup>

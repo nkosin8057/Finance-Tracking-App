@@ -30,17 +30,20 @@ const xyData = (xData, yData) => {
   return element;
 };
 
-const sumByMonth = (dValues, sumValues) => {
+const sumByMonth = (dStart, dEnd, sumValues) => {
   let summed = Array(12).fill(0);
   sumValues.forEach((element) => {
-    for (let index = 0; index < dValues.length; index++) {
+    for (let index = 0; index < dStart.length; index++) {
       let dt = new Date(
         new Date(element.date).getFullYear(),
         new Date(element.date).getMonth(),
-        1
+        new Date(element.date).getDate()
       );
-      let d = new Date(dValues[index]);
-      if (d.getTime() === dt.getTime()) {
+
+      if (
+        dt.getTime() >= dStart[index].getTime() &&
+        dt.getTime() <= dEnd[index].getTime()
+      ) {
         summed[index] += +element.amount;
       }
     }
@@ -59,13 +62,17 @@ export const AllItemsDisplayYear = () => {
   const setDate = new Date(monthCtx.monthDate);
   const dbRef = collection(db, "financeData");
 
-  const fetchDataHandler = async (mnth) => {
-    const mStart = new Date(mnth.getFullYear(), mnth.getMonth() - 11, 1);
-    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+  const fetchDataHandler = async () => {
+    const mnth = new Date(monthCtx.monthDate);
+    const mStart = new Date(
+      mnth.getFullYear(),
+      mnth.getMonth() - 11,
+      mnth.getDate()
+    );
     const q = query(
       dbRef,
       where("date", ">=", Timestamp.fromDate(new Date(mStart))),
-      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+      where("date", "<", Timestamp.fromDate(new Date(mnth)))
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
@@ -81,7 +88,7 @@ export const AllItemsDisplayYear = () => {
   };
 
   useEffect(() => {
-    fetchDataHandler(monthCtx.monthDate);
+    fetchDataHandler();
   }, [monthCtx.monthDate]);
 
   const income = [];
@@ -107,7 +114,8 @@ export const AllItemsDisplayYear = () => {
   const yVals = Array(12).fill(0);
 
   let xVals = [];
-  let dVals = [];
+  let dValsStart = [];
+  let dValsEnd = [];
 
   for (let index = 0; index < 12; index++) {
     let d = new Date(
@@ -115,12 +123,25 @@ export const AllItemsDisplayYear = () => {
       setDate.getMonth() - (11 - index),
       1
     );
-    dVals.push(d);
     xVals.push(`${dateFormat(d, "mmm")} ${dateFormat(d, "yy")}`);
+    dValsStart.push(
+      new Date(
+        new Date(monthCtx.periodStart).getFullYear(),
+        new Date(monthCtx.periodStart).getMonth() - (11 - index),
+        new Date(monthCtx.periodStart).getDate()
+      )
+    );
+    dValsEnd.push(
+      new Date(
+        new Date(monthCtx.periodEnd).getFullYear(),
+        new Date(monthCtx.periodEnd).getMonth() - (11 - index),
+        new Date(monthCtx.periodEnd).getDate()
+      )
+    );
   }
 
-  const summedExpenses = sumByMonth(dVals, expenses);
-  const incomeSummed = sumByMonth(dVals, income);
+  const summedExpenses = sumByMonth(dValsStart, dValsEnd, expenses);
+  const incomeSummed = sumByMonth(dValsStart, dValsEnd, income);
 
   const barValues1 = xyData(xVals, summedExpenses);
   const budgetValues = xyData(xVals, incomeSummed);

@@ -28,7 +28,7 @@ const xyData = (xData, yData) => {
 
   for (let index = 0; index < xData.length; index++) {
     let obj = { x: 0, y: 0 };
-    obj.x = xData[index];
+    obj.x = xData[index].toString();
     obj.y = yData[index];
     element.push(obj);
   }
@@ -43,13 +43,11 @@ export const SingleItemDisplayMonth = (props) => {
 
   const dbRef = collection(db, "financeData");
 
-  const fetchDataHandler = async (mnth) => {
-    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
-    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+  const fetchDataHandler = async () => {
     const q = query(
       dbRef,
-      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
-      where("date", "<=", Timestamp.fromDate(new Date(mEnd))),
+      where("date", ">=", Timestamp.fromDate(new Date(monthCtx.periodStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(monthCtx.periodEnd))),
       where("item", "==", props.props.toString())
     );
     onSnapshot(q, (snapshot) => {
@@ -61,24 +59,30 @@ export const SingleItemDisplayMonth = (props) => {
   };
 
   useEffect(() => {
-    fetchDataHandler(monthCtx.monthDate);
+    fetchDataHandler();
   }, [monthCtx.monthDate]);
 
   const options = { year: "numeric", month: "short", day: "numeric" };
 
-  const monthEndDay = new Date(
-    monthCtx.monthDate.getFullYear(),
-    monthCtx.monthDate.getMonth() + 1,
-    0
-  ).getDate();
-
   let xVals = [];
-  for (let index = 1; index <= monthEndDay; index++) {
-    xVals.push(index);
+  const days =
+    1 +
+    Math.ceil(
+      (new Date(monthCtx.periodEnd).getTime() -
+        new Date(monthCtx.periodStart).getTime()) /
+        (1000 * 3600 * 24)
+    );
+
+  const dt = monthCtx.periodStart;
+  for (let index = 0; index < days; index++) {
+    xVals.push(
+      new Date(dt.getFullYear(), dt.getMonth(), dt.getDate() + index).getDate()
+    );
   }
 
   let yVals = [];
   let budget = [];
+
   xVals.forEach((xElement) => {
     yVals.push(0);
     if (expenses.length > 0) {
@@ -86,16 +90,27 @@ export const SingleItemDisplayMonth = (props) => {
     }
 
     expenses.forEach((yElement) => {
-      if (new Date(yElement.date).getDate() === xElement) {
-        yVals[xElement - 1] += yElement.amount;
+      if (new Date(yElement.date).getDate() === +xElement) {
+        let i = xVals.findIndex((val) => val === +xElement);
+        yVals[i] += +yElement.amount;
       }
     });
   });
 
   const showValues = [];
   xVals.forEach((element) => {
-    if (element % 2 !== 0) {
-      showValues.push(element);
+    if (monthCtx.dayPeriodStart % 2 === 0) {
+      if (element % 2 === 0) {
+        showValues.push(element);
+      } else {
+        showValues.push("");
+      }
+    } else {
+      if (element % 2 !== 0) {
+        showValues.push(element);
+      } else {
+        showValues.push("");
+      }
     }
   });
 

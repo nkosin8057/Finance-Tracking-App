@@ -39,13 +39,17 @@ export const SingleItemDisplayYear = (props) => {
 
   const dbRef = collection(db, "financeData");
 
-  const fetchDataHandler = async (mnth) => {
-    const mStart = new Date(mnth.getFullYear(), mnth.getMonth() - 11, 1);
-    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+  const fetchDataHandler = async () => {
+    const mnth = new Date(monthCtx.periodStart);
+    const mStart = new Date(
+      mnth.getFullYear(),
+      mnth.getMonth() - 11,
+      mnth.getDate()
+    );
     const q = query(
       dbRef,
       where("date", ">=", Timestamp.fromDate(new Date(mStart))),
-      where("date", "<=", Timestamp.fromDate(new Date(mEnd))),
+      where("date", "<=", Timestamp.fromDate(new Date(monthCtx.periodEnd))),
       where("item", "==", props.props.toString())
     );
     onSnapshot(q, (snapshot) => {
@@ -57,7 +61,7 @@ export const SingleItemDisplayYear = (props) => {
   };
 
   useEffect(() => {
-    fetchDataHandler(monthCtx.monthDate);
+    fetchDataHandler();
   }, [monthCtx.monthDate]);
 
   expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -69,14 +73,35 @@ export const SingleItemDisplayYear = (props) => {
   let xVals = [];
   let yVals = [];
   let budget = [];
+  const dStart = monthCtx.periodStart;
+  const dEnd = monthCtx.periodEnd;
 
-  expenses.forEach((element) => {
-    const mnth = monthName(element.date);
-    const yr = dateFormat(element.date, "yy");
-    xVals.push(`${mnth} ${yr}`);
-    yVals.push(element.amount);
-    budget.push(element.budget);
-  });
+  for (let index = 0; index < 12; index++) {
+    let dS = new Date(
+      dStart.getFullYear(),
+      dStart.getMonth() - 11 + index,
+      dStart.getDate()
+    );
+    let dE = new Date(
+      dEnd.getFullYear(),
+      dEnd.getMonth() - 11 + index,
+      dEnd.getDate()
+    );
+    xVals.push(`${monthName(dE)} ${dateFormat(dE, "yy")}`);
+    let amountSum = 0;
+    let bgt = 0;
+    expenses.forEach((element) => {
+      if (
+        new Date(element.date).getTime() >= dS.getTime() &&
+        new Date(element.date).getTime() <= dE.getTime()
+      ) {
+        amountSum += +element.amount;
+        bgt = +element.budget;
+      }
+    });
+    yVals.push(amountSum);
+    budget.push(bgt);
+  }
 
   const barValues1 = xyData(xVals, yVals);
   const budgetValues = xyData(xVals, budget);

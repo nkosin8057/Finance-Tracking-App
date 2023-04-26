@@ -12,13 +12,21 @@ import { MonthContext } from "../../store/MonthProvider";
 import { toCurrency } from "../computations/ToCurrency";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { DateMenu } from "../elementaries/menus/DateMenu";
-import { AppDataContext } from "../../store/AppDataProvider";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 
 const createTableData = (data, dt) => {
-  const thrMnthDate = new Date(dt.getFullYear(), dt.getMonth() - 3, 1);
-  const twlMnthDate = new Date(dt.getFullYear(), dt.getMonth() - 11, 1);
+  const mnthDate = new Date(dt.getFullYear(), dt.getMonth() - 1, dt.getDate());
+  const thrMnthDate = new Date(
+    mnthDate.getFullYear(),
+    mnthDate.getMonth() - 3,
+    mnthDate.getDate()
+  );
+  const twlMnthDate = new Date(
+    mnthDate.getFullYear(),
+    mnthDate.getMonth() - 11,
+    mnthDate.getDate()
+  );
   const tableData = [];
   let idIndex = 1;
 
@@ -30,14 +38,13 @@ const createTableData = (data, dt) => {
       return indexData.item === data[i].item;
     });
 
-    let iDate = new Date(
-      new Date(data[i].date).getFullYear(),
-      new Date(data[i].date).getMonth(),
-      1
-    );
+    let iDate = new Date(data[i].date);
 
     if (exist === -1) {
-      if (new Date(iDate).getTime() === new Date(dt).getTime()) {
+      if (
+        new Date(iDate).getTime() >= new Date(mnthDate).getTime() &&
+        new Date(iDate).getTime() < new Date(dt).getTime()
+      ) {
         currMnth = data[i].amount;
       }
 
@@ -49,7 +56,7 @@ const createTableData = (data, dt) => {
       }
 
       if (
-        new Date(iDate).getTime() <= new Date(dt).getTime() &&
+        new Date(iDate).getTime() < new Date(dt).getTime() &&
         new Date(iDate).getTime() >= new Date(twlMnthDate).getTime()
       ) {
         yaSum = data[i].amount;
@@ -66,7 +73,10 @@ const createTableData = (data, dt) => {
 
       tableData.push(dataObj);
     } else {
-      if (new Date(iDate).getTime() === new Date(dt).getTime()) {
+      if (
+        new Date(iDate).getTime() >= new Date(mnthDate).getTime() &&
+        new Date(iDate).getTime() < new Date(dt).getTime()
+      ) {
         tableData[exist].curMnth += data[i].amount;
       }
 
@@ -78,7 +88,7 @@ const createTableData = (data, dt) => {
       }
 
       if (
-        new Date(iDate).getTime() <= new Date(dt).getTime() &&
+        new Date(iDate).getTime() < new Date(dt).getTime() &&
         new Date(iDate).getTime() >= new Date(twlMnthDate).getTime()
       ) {
         tableData[exist].yearSum += data[i].amount;
@@ -127,11 +137,7 @@ export const BalanceSheet = () => {
   const [noData, setNoData] = useState(true);
 
   const dbRef = collection(db, "financeData");
-  const dt = new Date(
-    new Date(monthCtx.monthDate).getFullYear(),
-    new Date(monthCtx.monthDate).getMonth(),
-    1
-  );
+  const dt = new Date(monthCtx.periodEnd);
 
   const fetchDataHandler = async () => {
     onSnapshot(dbRef, (snapshot) => {

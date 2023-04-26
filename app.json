@@ -24,7 +24,8 @@
         "foregroundImage": "",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.nkosin.FinanceTrackingApp"
+      "package": "com.nkosin.FinanceTrackingApp",
+      "versionCode": 1
     },
     "web": {
       "favicon": ""

@@ -17,7 +17,6 @@ import { MonthContext } from "../../store/MonthProvider";
 import { toCurrency } from "../computations/ToCurrency";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { AddEditDataModal } from "../modals/Add-EditDataModal";
-import { AppDataContext } from "../../store/AppDataProvider";
 import { sumData } from "../computations/SumData";
 import { db } from "../../../firebaseConfig";
 import {
@@ -30,7 +29,6 @@ import {
 } from "firebase/firestore";
 
 export const MainSummaryDisplay = ({ navigation }) => {
-  const dataCtx = useContext(AppDataContext);
   const monthCtx = useContext(MonthContext);
   const currencyCtx = useContext(CurrencyFormatContext);
 
@@ -39,16 +37,34 @@ export const MainSummaryDisplay = ({ navigation }) => {
   const [modalData, setModalData] = useState({});
   const [mnthData, setMnthData] = useState([]);
   const [noData, setNoData] = useState(true);
+  let maxId = 0;
 
-  const dbRef = collection(db, "financeData");
+  const fetchSettingsHandler = () => {
+    const settingsDbRef = collection(db, "settings");
+    onSnapshot(
+      settingsDbRef,
+      (snapshot) => {
+        const res = snapshot.docs.map((doc) => {
+          return { ...doc.data() };
+        });
+        if (res.length > 0) {
+          monthCtx.setDay(res[0].period);
+          currencyCtx.setCurrencyCode(res[0].currency);
+        }
+      },
+      (error) => {
+        Alert.alert("", error);
+      }
+    );
+    setLoading(false);
+  };
 
   const fetchDataHandler = async (mnth) => {
-    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
-    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+    const dbRef = collection(db, "financeData");
     const q = query(
       dbRef,
-      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
-      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+      where("date", ">=", Timestamp.fromDate(new Date(monthCtx.periodStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(monthCtx.periodEnd)))
     );
     onSnapshot(
       q,
@@ -59,6 +75,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
         if (res.length === 0) {
           setNoData(true);
         } else {
+          maxId = Math.max(...res.map((val) => val.id));
           setMnthData(res);
           setNoData(false);
         }
@@ -72,6 +89,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
 
   useEffect(() => {
     setLoading(true);
+    fetchSettingsHandler();
     fetchDataHandler(monthCtx.monthDate);
   }, [monthCtx.monthDate]);
 
@@ -106,7 +124,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
 
   const onDataSubmitted = async (data) => {
     await addDoc(dbRef, {
-      id: +dataCtx.maxID + 1,
+      id: +maxId + 1,
       item: data.item,
       date: Timestamp.fromDate(new Date(data.date)),
       amount: +data.amount,

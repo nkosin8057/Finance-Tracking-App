@@ -1,9 +1,10 @@
 import { View, Modal, StyleSheet } from "react-native";
 import { WheelPickerDisplay } from "./WheelPicker";
 import { Button } from "react-native-paper";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { MonthContext } from "../../store/MonthProvider";
-import { AppDataContext } from "../../store/AppDataProvider";
+import { db } from "../../../firebaseConfig";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 const months = [
   "Jan",
@@ -21,15 +22,42 @@ const months = [
 ];
 
 export const MonthYearPicker = (props) => {
-  const monthCtx = useContext(MonthContext);
-  const dataCtx = useContext(AppDataContext);
+  monthCtx = useContext(MonthContext);
+
+  let [yearDiff, setYearDiff] = useState(0);
+  const [stYear, setStYear] = useState(new Date().getFullYear());
+
+  const fetchStartYearHandler = async () => {
+    const dbRef = collection(db, "financeData");
+    const qStart = query(dbRef, orderBy("date"), limit(1));
+    const qEnd = query(dbRef, orderBy("date", "desc"), limit(1));
+    const dataStart = await getDocs(qStart);
+    const dataEnd = await getDocs(qEnd);
+
+    const resStart = dataStart.docs.map((doc) => ({
+      date: doc.data().date.toDate(),
+    }));
+
+    const resEnd = dataEnd.docs.map((doc) => ({
+      date: doc.data().date.toDate(),
+    }));
+
+    const yStart = resStart[0].date.getFullYear();
+    const yEnd = resEnd[0].date.getFullYear();
+
+    if (yStart > 0 && yEnd > 0) {
+      setYearDiff(yEnd - yStart);
+      monthCtx.setYear(yStart);
+    }
+  };
+
+  useEffect(() => {
+    fetchStartYearHandler();
+  }, []);
 
   let year = [];
-
-  const yearDiff = monthCtx.startYear - dataCtx.dataStartYear;
-
   for (let index = 0; index <= +yearDiff; index++) {
-    year.push(dataCtx.dataStartYear + index);
+    year.push(+monthCtx.startYear + index);
   }
 
   let monthIndex = monthCtx.monthDate.getMonth();
@@ -45,7 +73,8 @@ export const MonthYearPicker = (props) => {
   };
 
   const onSubmitHandler = () => {
-    monthCtx.setMonth(new Date(year[yearIndex], monthIndex));
+    const day = monthCtx.dayPeriodStart;
+    monthCtx.setMonth(new Date(year[yearIndex], monthIndex, day));
     props.modalClose();
   };
 

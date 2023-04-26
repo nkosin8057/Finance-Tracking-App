@@ -27,6 +27,3 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
-// export const db = initializeFirestore(firebaseConfig, {
-//   cacheSizeBytes: CACHE_SIZE_UNLIMITED,
-// });

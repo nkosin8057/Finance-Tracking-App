@@ -38,13 +38,11 @@ export const EditDisplay = () => {
 
   const dbRef = collection(db, "financeData");
 
-  const fetchDataHandler = async (mnth) => {
-    const mStart = new Date(mnth.getFullYear(), mnth.getMonth(), 1);
-    const mEnd = new Date(mnth.getFullYear(), mnth.getMonth() + 1, 0);
+  const fetchDataHandler = async () => {
     const q = query(
       dbRef,
-      where("date", ">=", Timestamp.fromDate(new Date(mStart))),
-      where("date", "<=", Timestamp.fromDate(new Date(mEnd)))
+      where("date", ">=", Timestamp.fromDate(new Date(monthCtx.periodStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(monthCtx.periodEnd)))
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
@@ -60,7 +58,7 @@ export const EditDisplay = () => {
   };
 
   useEffect(() => {
-    fetchDataHandler(monthCtx.monthDate);
+    fetchDataHandler();
   }, [monthCtx.monthDate]);
 
   const modalCloseHandler = () => {
