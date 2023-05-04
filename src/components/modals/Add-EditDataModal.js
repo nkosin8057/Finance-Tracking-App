@@ -7,9 +7,19 @@ import { Date_Picker } from "./DatePicker";
 import { CurrencyFormatContext } from "../../store/CurrencyFormat";
 import { toCurrency } from "../computations/ToCurrency";
 import { SelectList } from "react-native-dropdown-select-list";
+import { db } from "../../../firebaseConfig";
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query,
+  where,
+  limit,
+} from "firebase/firestore";
+import { MonthContext } from "../../store/MonthProvider";
 
 export const AddEditDataModal = (props) => {
-  const currencyCtx = useContext(CurrencyFormatContext);
+  const monthCtx = useContext(MonthContext);
   const screenWidth = Dimensions.get("window").width;
 
   const [showCalendar, setShowCalendar] = useState(false);
@@ -63,6 +73,7 @@ export const AddEditDataModal = (props) => {
 
   useEffect(() => {
     if (props.new === true) {
+      setItem("");
       setTypeDefault(selectType(""));
     } else {
       setItem(props.data.item);
@@ -72,7 +83,7 @@ export const AddEditDataModal = (props) => {
       setTypeDefault(selectType(props.data.type));
       setDescription(props.data.description);
     }
-  }, [props.data]);
+  }, []);
 
   const onSubmitHandler = () => {
     let error = false;
@@ -107,7 +118,7 @@ export const AddEditDataModal = (props) => {
 
     if (!error) {
       let savedData = {};
-      if (props.ne) {
+      if (props.new) {
         savedData = {
           item: item,
           date: selectDate,
@@ -145,7 +156,7 @@ export const AddEditDataModal = (props) => {
   const descriptionMessage = "Insert description or additional information.";
   typeMessage.bold;
   const onHelpPressed = (message, type) => {
-    Alert.alert(type, message);
+    Alert.alert(type, JSON.stringify(message));
   };
 
   const showCalendarHandler = () => {
@@ -159,6 +170,22 @@ export const AddEditDataModal = (props) => {
 
   const onCancellationHandler = () => {
     setShowCalendar(false);
+  };
+
+  const getBudgetHandler = async () => {
+    const dbRef = collection(db, "financeData");
+    const q = query(
+      dbRef,
+      where("date", ">=", Timestamp.fromDate(new Date(monthCtx.periodStart))),
+      where("date", "<=", Timestamp.fromDate(new Date(monthCtx.periodEnd))),
+      where("item", "==", item.toString()),
+      limit(1)
+    );
+
+    const budgetData = await getDocs(q);
+    if (!error && budgetData.length > 0) {
+      setBudget(budgetData[0].budget);
+    }
   };
 
   return (
@@ -185,6 +212,7 @@ export const AddEditDataModal = (props) => {
                 label="ITEM"
                 value={item}
                 onChangeText={(item) => setItem(item)}
+                onBlur={getBudgetHandler}
                 style={{ height: 35, width: screenWidth * 0.6 }}
                 error={itemError}
                 selectionColor={"blue"}

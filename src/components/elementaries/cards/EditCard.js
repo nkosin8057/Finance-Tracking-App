@@ -1,4 +1,4 @@
-import { Card, Button } from "react-native-paper";
+import { Button } from "react-native-paper";
 import { StyleSheet, View, Text, Alert } from "react-native";
 import { ShowMoreText } from "../../modals/ShowMoreText";
 
@@ -26,7 +26,7 @@ export const EditCard = (props) => {
   };
 
   return (
-    <Card style={styles.cardContainer}>
+    <View style={styles.cardContainer}>
       <View style={styles.cardViewContainer}>
         <View style={styles.upperSectionContainer}>
           <View style={styles.horizontalSectionContainer}>
@@ -74,7 +74,6 @@ export const EditCard = (props) => {
               style={styles.buttonStyle}
               icon="delete"
               mode="outlined"
-              compact="true"
               onPress={() => onButtonDeleteHandler()}
             >
               DELETE
@@ -86,15 +85,13 @@ export const EditCard = (props) => {
               style={styles.buttonStyle}
               icon="pencil"
               mode="outlined"
-              compact="true"
+              children={"EDIT"}
               onPress={() => onButtonEditHandler()}
-            >
-              EDIT
-            </Button>
+            ></Button>
           </View>
         </View>
       </View>
-    </Card>
+    </View>
   );
 };
 
@@ -192,7 +189,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "white",
     borderRadius: 15,
-    width: 70,
+    width: 90,
     height: 33,
     alignSelf: "center",
   },
@@ -200,5 +197,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 8,
     fontWeight: "bold",
+    textAlign: "justify",
+    lineHeight: 12,
   },
 });

@@ -1,4 +1,3 @@
-import { Card } from "react-native-paper";
 import { View, StyleSheet, Text } from "react-native";
 import { SemiCircleProgressDisplay } from "../progress_displays/SemiCircleProgress";
 import { CurrencyFormatContext } from "../../../store/CurrencyFormat";
@@ -20,7 +19,7 @@ export const TotalSummaryCard = (props) => {
   }
 
   return (
-    <Card style={styles().cardContainer}>
+    <View style={styles().cardContainer}>
       <View style={styles().cardViewContainer}>
         <SemiCircleProgressDisplay spent={+props.spent} total={+props.total} />
         <Text style={styles(textColour).profitLossText}>
@@ -28,7 +27,7 @@ export const TotalSummaryCard = (props) => {
           {toCurrency(profitLoss, currencyCtx.getCurrencyCode)}
         </Text>
       </View>
-    </Card>
+    </View>
   );
 };
 const styles = (colour) =>
@@ -36,9 +35,7 @@ const styles = (colour) =>
     cardContainer: {
       height: 180,
       width: "100%",
-      marginBottom: 5,
-      elevation: 3,
-      backgroundColor: "transparent",
+      marginBottom: 15,
     },
     cardViewContainer: {
       flexDirection: "column",

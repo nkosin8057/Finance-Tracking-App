@@ -53,7 +53,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
         }
       },
       (error) => {
-        Alert.alert("", error);
+        Alert.alert("", JSON.stringify(error));
       }
     );
     setLoading(false);
@@ -81,7 +81,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
         }
       },
       (error) => {
-        Alert.alert("", error);
+        Alert.alert("", JSON.stringify(error));
       }
     );
     setLoading(false);
@@ -118,7 +118,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
 
   const onModalButtonSelected = () => {
     setShowModal(true);
-    const obj = { item: "", amount: 1, limit: 0, type: "", description: "" };
+    const obj = { item: "", amount: 1, budget: 0, type: "", description: "" };
     setModalData(obj);
   };
 

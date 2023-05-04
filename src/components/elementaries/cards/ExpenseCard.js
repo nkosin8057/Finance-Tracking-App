@@ -1,4 +1,4 @@
-import { Button, Card, Title } from "react-native-paper";
+import { Button, Title } from "react-native-paper";
 import { StyleSheet, View, Text } from "react-native";
 import { ItemsProgressBar } from "../progress_displays/ItemsProgressBar";
 import { CurrencyFormatContext } from "../../../store/CurrencyFormat";
@@ -37,7 +37,7 @@ export const ExpenseCard = (props) => {
   };
 
   return (
-    <Card style={styles().cardContainer}>
+    <View style={styles().cardContainer}>
       <View style={styles().cardViewContainer}>
         <View style={styles().cardLeftContainer}>
           <View style={styles().cardTitleContainer}>
@@ -78,7 +78,7 @@ export const ExpenseCard = (props) => {
           </View>
         </View>
       </View>
-    </Card>
+    </View>
   );
 };
 
@@ -89,8 +89,14 @@ const styles = (colour) =>
       height: 120,
       width: "100%",
       marginBottom: 25,
-      elevation: 3,
-      backgroundColor: "transparent",
+      backgroundColor: "rgba(0, 0, 0, 0.2)",
+      borderWidth: 1,
+      borderColor: "black",
+      shadowColor: "white",
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.5,
+      shadowRadius: 2,
+      elevation: 2,
     },
     cardViewContainer: {
       flexDirection: "row",

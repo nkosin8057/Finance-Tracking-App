@@ -23,8 +23,9 @@ export const DateMenu = () => {
         <Text style={styles.text}>{`${month} ${year}`}</Text>
         <IconButton
           icon="calendar-month"
-          size={30}
-          color={"white"}
+          size={40}
+          iconColor={"white"}
+          animated={true}
           onPress={() => {
             setShowModal(true);
           }}
