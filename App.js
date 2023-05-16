@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 import { StyleSheet, SafeAreaView } from "react-native";
 import MonthProvider from "./src/store/MonthProvider";
@@ -11,82 +12,105 @@ import { Ionicons } from "@expo/vector-icons";
 import { EditDisplay } from "./src/components/screen/EditDisplay";
 import { BalanceSheet } from "./src/components/screen/BalanceSheet";
 import { Settings } from "./src/components/screen/Settings";
+import { Login } from "./src/components/screen/LoginScreen";
+import { auth } from "./firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function App() {
   const Tab = createMaterialBottomTabNavigator();
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setIsUserLoggedIn(true);
+    } else {
+      setIsUserLoggedIn(false);
+    }
+  });
+
+  const getUserStatusHandler = (status) => {
+    setIsUserLoggedIn(status);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <MonthProvider>
-        <CurrencyFormatProvider>
-          <NavigationContainer>
-            <Tab.Navigator
-              initialRouteName="Home"
-              activeColor="white"
-              inactiveColor="black"
-              barStyle={{ backgroundColor: "rgba(190, 194, 203, 0.7)" }}
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              <Tab.Screen
-                name="Home"
-                component={HomeScreen}
-                options={{
-                  tabBarLabel: "Home",
-                  tabBarIcon: ({ color }) => (
-                    <Ionicons name="home-outline" color={color} size={26} />
-                  ),
+      {!isUserLoggedIn && <Login getUserStatus={getUserStatusHandler} />}
+      {isUserLoggedIn && (
+        <MonthProvider>
+          <CurrencyFormatProvider>
+            <NavigationContainer>
+              <Tab.Navigator
+                initialRouteName="Home"
+                activeColor="white"
+                inactiveColor="black"
+                barStyle={{ backgroundColor: "rgba(190, 194, 203, 0.7)" }}
+                screenOptions={{
+                  headerShown: false,
                 }}
-              />
-              <Tab.Screen
-                name="All"
-                component={AllItemsDisplay}
-                options={{
-                  tabBarLabel: "All",
-                  tabBarIcon: ({ color }) => (
-                    <Ionicons name="wallet" color={color} size={26} />
-                  ),
-                }}
-              />
-              <Tab.Screen
-                name="Edit"
-                component={EditDisplay}
-                options={{
-                  tabBarLabel: "Edit",
-                  tabBarIcon: ({ color }) => (
-                    <Ionicons
-                      name="md-pencil-outline"
-                      color={color}
-                      size={26}
-                    />
-                  ),
-                }}
-              />
-              <Tab.Screen
-                name="BalanceSheet"
-                component={BalanceSheet}
-                options={{
-                  tabBarLabel: "Bal. Sheet",
-                  tabBarIcon: ({ color }) => (
-                    <Ionicons name="receipt-outline" color={color} size={26} />
-                  ),
-                }}
-              />
-              <Tab.Screen
-                name="Settings"
-                component={Settings}
-                options={{
-                  tabBarLabel: "Settings",
-                  tabBarIcon: ({ color }) => (
-                    <Ionicons name="md-settings" color={color} size={26} />
-                  ),
-                }}
-              />
-            </Tab.Navigator>
-          </NavigationContainer>
-        </CurrencyFormatProvider>
-      </MonthProvider>
+              >
+                <Tab.Screen
+                  name="Home"
+                  component={HomeScreen}
+                  options={{
+                    tabBarLabel: "Home",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons name="home-outline" color={color} size={26} />
+                    ),
+                  }}
+                />
+                <Tab.Screen
+                  name="All"
+                  component={AllItemsDisplay}
+                  options={{
+                    tabBarLabel: "All",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons name="wallet" color={color} size={26} />
+                    ),
+                  }}
+                />
+                <Tab.Screen
+                  name="Edit"
+                  component={EditDisplay}
+                  options={{
+                    tabBarLabel: "Edit",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons
+                        name="md-pencil-outline"
+                        color={color}
+                        size={26}
+                      />
+                    ),
+                  }}
+                />
+                <Tab.Screen
+                  name="BalanceSheet"
+                  component={BalanceSheet}
+                  options={{
+                    tabBarLabel: "Bal. Sheet",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons
+                        name="receipt-outline"
+                        color={color}
+                        size={26}
+                      />
+                    ),
+                  }}
+                />
+                <Tab.Screen
+                  name="Settings"
+                  component={Settings}
+                  options={{
+                    tabBarLabel: "Settings",
+                    tabBarIcon: ({ color }) => (
+                      <Ionicons name="md-settings" color={color} size={26} />
+                    ),
+                  }}
+                />
+              </Tab.Navigator>
+            </NavigationContainer>
+          </CurrencyFormatProvider>
+        </MonthProvider>
+      )}
       <ExpoStatusBar style="auto" />
     </SafeAreaView>
   );

@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "FinanceTrackingApp",
+    "name": "Finance Tracker",
     "slug": "FinanceTrackingApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "",
+    "icon": "./assets/images/playstore.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "",

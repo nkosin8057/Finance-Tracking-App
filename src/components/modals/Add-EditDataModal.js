@@ -4,8 +4,6 @@ import { TextInput } from "react-native-paper";
 import { useState, useContext, useEffect } from "react";
 import dateFormat from "dateformat";
 import { Date_Picker } from "./DatePicker";
-import { CurrencyFormatContext } from "../../store/CurrencyFormat";
-import { toCurrency } from "../computations/ToCurrency";
 import { SelectList } from "react-native-dropdown-select-list";
 import { db } from "../../../firebaseConfig";
 import {
