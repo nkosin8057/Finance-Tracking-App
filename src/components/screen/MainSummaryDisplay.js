@@ -38,6 +38,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
   const [mnthData, setMnthData] = useState([]);
   const [noData, setNoData] = useState(true);
   let maxId = 0;
+  const dbRef = collection(db, "financeData");
 
   const fetchSettingsHandler = () => {
     const settingsDbRef = collection(db, "settings");
@@ -60,7 +61,6 @@ export const MainSummaryDisplay = ({ navigation }) => {
   };
 
   const fetchDataHandler = async (mnth) => {
-    const dbRef = collection(db, "financeData");
     const q = query(
       dbRef,
       where("date", ">=", Timestamp.fromDate(new Date(monthCtx.periodStart))),

@@ -37,10 +37,9 @@ export const Login = (props) => {
 
   const registerNewUser = () => {
     createUserWithEmailAndPassword(auth, email, password)
-      .then(props.getUserStatus(true))
-      //   .then((userCredential) => {
-      //     const user = userCredential.user;
-      //   })
+      .then((userCredential) => {
+        props.getUser(userCredential.user);
+      })
       .catch((error) => {
         Alert.alert(JSON.stringify(error.message));
       });
@@ -48,7 +47,9 @@ export const Login = (props) => {
 
   const loginUser = () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then(props.getUserStatus(true))
+      .then((userCredential) => {
+        props.getUser(userCredential.user);
+      })
       .catch((error) => {
         Alert.alert(JSON.stringify(error.message));
       });

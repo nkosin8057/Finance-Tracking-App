@@ -20,21 +20,22 @@ export default function App() {
   const Tab = createMaterialBottomTabNavigator();
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      setIsUserLoggedIn(true);
-    } else {
-      setIsUserLoggedIn(false);
-    }
-  });
+  // onAuthStateChanged(auth, (user) => {
+  //   if (user) {
+  //     setIsUserLoggedIn(true);
+  //   } else {
+  //     setIsUserLoggedIn(false);
+  //   }
+  // });
 
-  const getUserStatusHandler = (status) => {
-    setIsUserLoggedIn(status);
+  const getUserHandler = (user) => {
+    console.log(user.uid);
+    setIsUserLoggedIn(true);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {!isUserLoggedIn && <Login getUserStatus={getUserStatusHandler} />}
+      {!isUserLoggedIn && <Login getUser={getUserHandler} />}
       {isUserLoggedIn && (
         <MonthProvider>
           <CurrencyFormatProvider>
