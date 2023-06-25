@@ -54,7 +54,7 @@ export const SingleItemDisplayYear = (props) => {
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate() };
+        return { ...doc.data(), date: doc.data().date.toDate(), id: doc.id };
       });
       setExpenses(res);
     });
@@ -67,7 +67,7 @@ export const SingleItemDisplayYear = (props) => {
   expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const expenseSum = expenses.reduce((prev, curr) => {
-    return prev + curr.amount;
+    return +prev.toFixed(2) + +curr.amount.toFixed(2);
   }, 0);
 
   let xVals = [];
@@ -128,7 +128,7 @@ export const SingleItemDisplayYear = (props) => {
   const csMax = Math.max(...candleData.map((mValue) => mValue.y));
   const csMin = Math.min(...candleData.map((mValue) => mValue.y));
 
-  const lossProfit = candleData[candleData.length - 1].y;
+  const lossProfit = (+candleData[candleData.length - 1].y).toFixed(2);
 
   let lossProfitText = "Profit";
   if (lossProfit < 0) {

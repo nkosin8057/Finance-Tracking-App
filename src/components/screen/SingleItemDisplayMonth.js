@@ -52,7 +52,7 @@ export const SingleItemDisplayMonth = (props) => {
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate() };
+        return { ...doc.data(), date: doc.data().date.toDate(), id: doc.id };
       });
       setExpenses(res);
     });
@@ -115,13 +115,13 @@ export const SingleItemDisplayMonth = (props) => {
   });
 
   const totalSpent = expenses.reduce((prev, curr) => {
-    return prev + curr.amount;
+    return +prev.toFixed(2) + +curr.amount.toFixed(2);
   }, 0);
 
   let profitLoss = 0;
 
   if (expenses.length > 0) {
-    profitLoss = expenses[0].budget - totalSpent;
+    profitLoss = (expenses[0].budget - totalSpent).toFixed(2);
   }
 
   let lossProfitText = "Profit";

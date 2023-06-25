@@ -5,7 +5,8 @@ import { useState } from "react";
 
 export const ShowMoreText = (props) => {
   const [showModal, setShowModal] = useState(false);
-  const slicedString = props.description.slice(0, 80);
+  const slicedString =
+    props.description === null ? "" : props.description.slice(0, 80);
 
   const onClickHandler = () => {
     setShowModal(true);

@@ -52,7 +52,7 @@ const createTableData = (data, dt) => {
         new Date(iDate).getTime() < new Date(dt).getTime() &&
         new Date(iDate).getTime() >= new Date(thrMnthDate).getTime()
       ) {
-        thrMnthAve = Math.round(data[i].amount / 3);
+        thrMnthAve = Math.round(+data[i].amount / 3);
       }
 
       if (
@@ -77,21 +77,21 @@ const createTableData = (data, dt) => {
         new Date(iDate).getTime() >= new Date(mnthDate).getTime() &&
         new Date(iDate).getTime() < new Date(dt).getTime()
       ) {
-        tableData[exist].curMnth += data[i].amount;
+        tableData[exist].curMnth += +data[i].amount;
       }
 
       if (
         new Date(iDate).getTime() < new Date(dt).getTime() &&
         new Date(iDate).getTime() >= new Date(thrMnthDate).getTime()
       ) {
-        tableData[exist].thrMnthAv += Math.round(data[i].amount / 3);
+        tableData[exist].thrMnthAv += +Math.round(data[i].amount / 3);
       }
 
       if (
         new Date(iDate).getTime() < new Date(dt).getTime() &&
         new Date(iDate).getTime() >= new Date(twlMnthDate).getTime()
       ) {
-        tableData[exist].yearSum += data[i].amount;
+        tableData[exist].yearSum += +data[i].amount;
       }
     }
 
@@ -105,19 +105,19 @@ const sumTotal = (data, item) => {
   const curMonth = data
     .filter((type) => type.type === item)
     .reduce((prev, curr) => {
-      return prev + curr.curMnth;
+      return +prev + +curr.curMnth;
     }, 0);
 
   const threeMnthAv = data
     .filter((type) => type.type === item)
     .reduce((prev, curr) => {
-      return prev + curr.thrMnthAv;
+      return +prev + +curr.thrMnthAv;
     }, 0);
 
   const twelveMnth = data
     .filter((type) => type.type === item)
     .reduce((prev, curr) => {
-      return prev + curr.yearSum;
+      return +prev + +curr.yearSum;
     }, 0);
 
   const totalSum = {
@@ -142,7 +142,7 @@ export const BalanceSheet = () => {
   const fetchDataHandler = async () => {
     onSnapshot(dbRef, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate() };
+        return { ...doc.data(), date: doc.data().date.toDate(), id: doc.id };
       });
       if (res.length === 0) {
         setNoData(true);
@@ -241,7 +241,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      incomeTotal.curMnthSum,
+                      (+incomeTotal.curMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -250,7 +250,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      incomeTotal.thrMnthSum,
+                      (+incomeTotal.thrMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -259,7 +259,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      incomeTotal.twelveMnthSum,
+                      (+incomeTotal.twelveMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -287,7 +287,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            income.curMnth,
+                            (+income.curMnth).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -296,7 +296,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            income.thrMnthAv,
+                            (+income.thrMnthAv).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -305,7 +305,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            income.yearSum,
+                            (+income.yearSum).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -325,7 +325,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      expVariableTotal.curMnthSum,
+                      (+expVariableTotal.curMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -334,7 +334,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      expVariableTotal.thrMnthSum,
+                      (+expVariableTotal.thrMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -343,7 +343,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      expVariableTotal.twelveMnthSum,
+                      (+expVariableTotal.twelveMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -370,7 +370,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            expense.curMnth,
+                            (+expense.curMnth).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -379,7 +379,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            expense.thrMnthAv,
+                            (+expense.thrMnthAv).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -388,7 +388,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            expense.yearSum,
+                            (+expense.yearSum).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -407,7 +407,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      expFixedTotal.curMnthSum,
+                      (+expFixedTotal.curMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -416,7 +416,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      expFixedTotal.thrMnthSum,
+                      (+expFixedTotal.thrMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -425,7 +425,7 @@ export const BalanceSheet = () => {
                     style={styles.secondHeader}
                   >
                     {toCurrency(
-                      expFixedTotal.twelveMnthSum,
+                      (+expFixedTotal.twelveMnthSum).toFixed(2),
                       currencyCtx.getCurrencyCode
                     )}
                   </DataTable.Title>
@@ -452,7 +452,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            expense.curMnth,
+                            (+expense.curMnth).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -461,7 +461,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            expense.thrMnthAv,
+                            (+expense.thrMnthAv).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -470,7 +470,7 @@ export const BalanceSheet = () => {
                           textStyle={styles.rowText}
                         >
                           {toCurrency(
-                            expense.yearSum,
+                            (+expense.yearSum).toFixed(2),
                             currencyCtx.getCurrencyCode
                           )}
                         </DataTable.Cell>
@@ -491,7 +491,7 @@ export const BalanceSheet = () => {
                   style={styles.secondHeader}
                 >
                   {toCurrency(
-                    grandTotal.curMnthSum,
+                    (+grandTotal.curMnthSum).toFixed(2),
                     currencyCtx.getCurrencyCode
                   )}
                 </DataTable.Title>
@@ -500,7 +500,7 @@ export const BalanceSheet = () => {
                   style={styles.secondHeader}
                 >
                   {toCurrency(
-                    grandTotal.thrMnthSum,
+                    (+grandTotal.thrMnthSum).toFixed(2),
                     currencyCtx.getCurrencyCode
                   )}
                 </DataTable.Title>
@@ -509,7 +509,7 @@ export const BalanceSheet = () => {
                   style={styles.secondHeader}
                 >
                   {toCurrency(
-                    grandTotal.twelveMnthSum,
+                    (+grandTotal.twelveMnthSum).toFixed(2),
                     currencyCtx.getCurrencyCode
                   )}
                 </DataTable.Title>
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
   secondHeaderText: {
     fontWeight: "bold",
     color: "white",
-    fontSize: 14,
+    fontSize: 11,
   },
   row1: {
     backgroundColor: "rgba(190, 194, 203, 0.8)",
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   rowText: {
     fontWeight: "800",
     color: "black",
-    fontSize: 12,
+    fontSize: 10,
   },
   noDataContainer: {
     flexDirection: "row",

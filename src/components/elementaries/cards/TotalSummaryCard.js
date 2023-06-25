@@ -6,7 +6,7 @@ import { useContext } from "react";
 
 export const TotalSummaryCard = (props) => {
   const currencyCtx = useContext(CurrencyFormatContext);
-  const profitLoss = +props.total - +props.spent;
+  const profitLoss = (+props.total - +props.spent).toFixed(2);
   const ratio = +props.spent / +props.total;
   let textColour = "#00cc33";
 

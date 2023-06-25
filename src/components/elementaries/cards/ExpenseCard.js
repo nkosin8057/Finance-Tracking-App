@@ -8,9 +8,9 @@ import { useContext } from "react";
 export const ExpenseCard = (props) => {
   const currencyCtx = useContext(CurrencyFormatContext);
   const name = props.name;
-  const expense = +props.amount;
-  const income = props.income;
-  const limit = +props.limit;
+  const expense = (+props.amount).toFixed(2);
+  const income = (+props.income).toFixed(2);
+  const limit = (+props.limit).toFixed(2);
   const type = props.type;
 
   const contrib = ((expense / income) * 100).toFixed(1);

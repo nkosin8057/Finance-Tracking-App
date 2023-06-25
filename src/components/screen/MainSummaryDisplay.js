@@ -27,6 +27,7 @@ import {
   where,
   onSnapshot,
 } from "firebase/firestore";
+import { objectSum } from "../computations/SumData";
 
 export const MainSummaryDisplay = ({ navigation }) => {
   const monthCtx = useContext(MonthContext);
@@ -37,7 +38,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
   const [modalData, setModalData] = useState({});
   const [mnthData, setMnthData] = useState([]);
   const [noData, setNoData] = useState(true);
-  let maxId = 0;
+  let maxId;
   const dbRef = collection(db, "financeData");
 
   const fetchSettingsHandler = () => {
@@ -60,7 +61,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
     setLoading(false);
   };
 
-  const fetchDataHandler = async (mnth) => {
+  const fetchDataHandler = async () => {
     const q = query(
       dbRef,
       where("date", ">=", Timestamp.fromDate(new Date(monthCtx.periodStart))),
@@ -70,7 +71,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
       q,
       (snapshot) => {
         const res = snapshot.docs.map((doc) => {
-          return { ...doc.data(), date: doc.data().date.toDate() };
+          return { ...doc.data(), date: doc.data().date.toDate(), id: doc.id };
         });
         if (res.length === 0) {
           setNoData(true);
@@ -88,15 +89,16 @@ export const MainSummaryDisplay = ({ navigation }) => {
   };
 
   useEffect(() => {
+    setMnthData([]);
     setLoading(true);
     fetchSettingsHandler();
-    fetchDataHandler(monthCtx.monthDate);
+    fetchDataHandler();
   }, [monthCtx.monthDate]);
 
-  const incomeSum = sumData(mnthData, "income");
-  const fExpensesSum = sumData(mnthData, "exp-fixed");
-  const vExpensesSum = sumData(mnthData, "exp-variable");
-  const aExpensesSum = sumData(mnthData, "expenses");
+  const incomeSum = sumData(mnthData, "income").toFixed(2);
+  const fExpensesSum = sumData(mnthData, "exp-fixed").toFixed(2);
+  const vExpensesSum = sumData(mnthData, "exp-variable").toFixed(2);
+  const aExpensesSum = sumData(mnthData, "expenses").toFixed(2);
   let expenses = [];
 
   for (let index = 0; index < mnthData.length; index++) {
@@ -107,6 +109,8 @@ export const MainSummaryDisplay = ({ navigation }) => {
       expenses.push(mnthData[index]);
     }
   }
+
+  expenses = objectSum(expenses);
 
   const onButtonSelected = (selection) => {
     navigation.navigate("SingleItem", { item: selection });
@@ -124,7 +128,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
 
   const onDataSubmitted = async (data) => {
     await addDoc(dbRef, {
-      id: +maxId + 1,
+      id: Math.floor(Math.random() * (1000000 - 1 + 1)) + 1,
       item: data.item,
       date: Timestamp.fromDate(new Date(data.date)),
       amount: +data.amount,

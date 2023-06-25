@@ -76,7 +76,7 @@ export const AllItemsDisplayYear = () => {
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate() };
+        return { ...doc.data(), date: doc.data().date.toDate(), id: doc.id };
       });
       if (res.length === 0) {
         setNoData(true);
@@ -168,7 +168,7 @@ export const AllItemsDisplayYear = () => {
   const csMax = Math.max(...candleData.map((mValue) => mValue.y));
   const csMin = Math.min(...candleData.map((mValue) => mValue.y));
 
-  const lossProfit = incomeSum - expenseSum;
+  const lossProfit = (incomeSum - expenseSum).toFixed(2);
 
   let lossProfitText = "Profit";
   if (lossProfit < 0) {
@@ -185,7 +185,10 @@ export const AllItemsDisplayYear = () => {
             <View style={styles.totalContainer}>
               <Text style={styles.text}>
                 Total Spent:{" "}
-                {toCurrency(expenseSum, currencyCtx.getCurrencyCode)}
+                {toCurrency(
+                  +expenseSum.toFixed(2),
+                  currencyCtx.getCurrencyCode
+                )}
               </Text>
               {
                 <Text

@@ -52,7 +52,7 @@ export const AllItemDisplayMonth = () => {
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate() };
+        return { ...doc.data(), date: doc.data().date.toDate(), id: doc.id };
       });
       if (res.length === 0) {
         setNoData(true);
@@ -131,13 +131,13 @@ export const AllItemDisplayMonth = () => {
   });
 
   const totalSpent = expenses.reduce((prev, curr) => {
-    return prev + curr.amount;
+    return +prev + +curr.amount;
   }, 0);
 
   let profitLoss = 0;
 
   if (expenses.length > 0) {
-    profitLoss = income - totalSpent;
+    profitLoss = (+income - +totalSpent).toFixed(2);
   }
 
   let lossProfitText = "Profit";
@@ -149,7 +149,10 @@ export const AllItemDisplayMonth = () => {
     <SingleItemExpenseCard
       item={item.item}
       date={dateFormat(new Date(item.date), "dd mmm yy")}
-      amount={toCurrency(item.amount, currencyCtx.getCurrencyCode)}
+      amount={toCurrency(
+        (+item.amount).toFixed(2),
+        currencyCtx.getCurrencyCode
+      )}
       description={item.description}
     />
   );
@@ -175,7 +178,10 @@ export const AllItemDisplayMonth = () => {
             <View style={styles.totalSummaryContainer}>
               <Text style={styles.text}>
                 Total Spent:{" "}
-                {toCurrency(totalSpent, currencyCtx.getCurrencyCode)}
+                {toCurrency(
+                  +totalSpent.toFixed(2),
+                  currencyCtx.getCurrencyCode
+                )}
               </Text>
               {
                 <Text

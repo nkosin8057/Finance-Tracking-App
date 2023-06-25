@@ -13,6 +13,8 @@ import {
   query,
   where,
   limit,
+  getDocs,
+  getDoc,
 } from "firebase/firestore";
 import { MonthContext } from "../../store/MonthProvider";
 
@@ -83,6 +85,14 @@ export const AddEditDataModal = (props) => {
     }
   }, []);
 
+  const clearAll = () => {
+    setItem();
+    setSelectDate(new Date());
+    setAmount();
+    setBudget();
+    setDescription("");
+  };
+
   const onSubmitHandler = () => {
     let error = false;
 
@@ -138,11 +148,13 @@ export const AddEditDataModal = (props) => {
       }
 
       props.onDataSubmitted(savedData);
+      clearAll();
       props.modalClose();
     }
   };
 
   const onCancelHandler = () => {
+    clearAll();
     props.modalClose();
   };
 
@@ -181,9 +193,11 @@ export const AddEditDataModal = (props) => {
     );
 
     const budgetData = await getDocs(q);
-    if (!error && budgetData.length > 0) {
-      setBudget(budgetData[0].budget);
-    }
+    budgetData.forEach((doc) => {
+      if (!itemError && +doc.data().budget > 0) {
+        setBudget(doc.data().budget.toString());
+      }
+    });
   };
 
   return (

@@ -52,3 +52,28 @@ export const objectItemSum = (data) => {
   summedItems.sort((a, b) => new Date(a.date) - new Date(b.date));
   return summedItems;
 };
+
+export const objectSum = (data) => {
+  let summedItems = [];
+
+  data.map((item) => {
+    let exist = summedItems.findIndex((indexData) => {
+      return indexData.item === item.item;
+    });
+    if (exist !== -1) {
+      summedItems[exist].amount += +item.amount;
+    } else {
+      let expObj = {
+        id: item.id,
+        item: item.item,
+        amount: +item.amount,
+        budget: +item.budget,
+        type: item.type,
+      };
+
+      summedItems.push(expObj);
+    }
+  });
+
+  return summedItems;
+};

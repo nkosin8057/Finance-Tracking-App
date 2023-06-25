@@ -18,8 +18,8 @@ const defaultState = {
   dayPeriodStart: 1,
   monthDate: tDay,
   startYear: tDay.getFullYear(),
-  periodStart: new Date(tDay.getFullYear(), tDay.getMonth(), 1),
-  periodEnd: new Date(tDay.getFullYear(), tDay.getMonth() + 1, 0),
+  periodStart: new Date(tDay.getFullYear(), tDay.getMonth() - 1, 26),
+  periodEnd: new Date(tDay.getFullYear(), tDay.getMonth() + 1, 25),
 };
 
 const monthReducer = (state, action) => {

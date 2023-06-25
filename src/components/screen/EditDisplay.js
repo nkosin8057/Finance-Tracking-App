@@ -46,7 +46,12 @@ export const EditDisplay = () => {
     );
     onSnapshot(q, (snapshot) => {
       const res = snapshot.docs.map((doc) => {
-        return { ...doc.data(), date: doc.data().date.toDate(), _id: doc.id };
+        return {
+          ...doc.data(),
+          date: doc.data().date.toDate(),
+          _id: doc.id,
+          id: doc.id,
+        };
       });
       if (res.length === 0) {
         setNoData(true);
@@ -102,8 +107,11 @@ export const EditDisplay = () => {
       id={item._id}
       name={item.item}
       date={dateFormat(new Date(item.date), "dd mmm yy")}
-      amount={toCurrency(item.amount, currencyCtx.getCurrencyCode)}
-      budget={toCurrency(item.budget, currencyCtx.getCurrencyCode)}
+      amount={toCurrency(
+        (+item.amount).toFixed(2),
+        currencyCtx.getCurrencyCode
+      )}
+      budget={toCurrency(+item.budget, currencyCtx.getCurrencyCode)}
       type={item.type}
       description={item.description}
       onButtonEditSelected={onButtonEditSelected}
