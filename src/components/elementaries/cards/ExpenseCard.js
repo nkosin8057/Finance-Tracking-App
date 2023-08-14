@@ -159,7 +159,7 @@ const styles = (colour) =>
       color: "white",
     },
     textSpent: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: "bold",
       color: colour,
     },

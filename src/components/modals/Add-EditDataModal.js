@@ -83,7 +83,7 @@ export const AddEditDataModal = (props) => {
       setTypeDefault(selectType(props.data.type));
       setDescription(props.data.description);
     }
-  }, []);
+  }, [props]);
 
   const clearAll = () => {
     setItem();
@@ -130,8 +130,8 @@ export const AddEditDataModal = (props) => {
         savedData = {
           item: item,
           date: selectDate,
-          amount: amount,
-          budget: budget,
+          amount: +amount,
+          budget: +budget,
           type: typeText(+type),
           description: description,
         };
@@ -140,8 +140,8 @@ export const AddEditDataModal = (props) => {
           id: props.data._id,
           item: item,
           date: selectDate,
-          amount: amount,
-          budget: budget,
+          amount: +amount,
+          budget: +budget,
           type: typeText(+type),
           description: description,
         };

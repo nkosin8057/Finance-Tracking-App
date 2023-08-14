@@ -144,7 +144,7 @@ export const EditDisplay = () => {
             <FlatList
               data={mnthData}
               renderItem={renderItem}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item._id}
               contentContainerStyle={{ padding: 5 }}
             />
           </View>

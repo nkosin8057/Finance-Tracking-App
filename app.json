@@ -4,7 +4,7 @@
     "slug": "FinanceTrackingApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/playstore.png",
+    "icon": "./assets/images/ic_launcher.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "",
