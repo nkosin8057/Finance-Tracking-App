@@ -1,6 +1,19 @@
 import React from "react";
 import { useReducer } from "react";
 
+const getPeriod = () => {
+  const day = new Date().getDate();
+  let period = 0;
+  const d = 26;
+  if (day >= d) {
+    period = 0;
+  } else {
+    period = 1;
+  }
+
+  return period;
+};
+
 const tDay = new Date();
 
 export const MonthContext = React.createContext({
@@ -18,8 +31,16 @@ const defaultState = {
   dayPeriodStart: 1,
   monthDate: tDay,
   startYear: tDay.getFullYear(),
-  periodStart: new Date(tDay.getFullYear(), tDay.getMonth() - 1, 26),
-  periodEnd: new Date(tDay.getFullYear(), tDay.getMonth() + 1, 25),
+  periodStart: new Date(
+    tDay.getFullYear(),
+    tDay.getMonth() - getPeriod(26),
+    26
+  ),
+  periodEnd: new Date(
+    tDay.getFullYear(),
+    tDay.getMonth() - getPeriod(26) + 1,
+    25
+  ),
 };
 
 const monthReducer = (state, action) => {
@@ -29,8 +50,16 @@ const monthReducer = (state, action) => {
       dayPeriodStart: state.dayPeriodStart,
       monthDate: d,
       startYear: state.startYear,
-      periodStart: new Date(d.getFullYear(), d.getMonth() - 1, d.getDate()),
-      periodEnd: new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1),
+      periodStart: new Date(
+        d.getFullYear(),
+        d.getMonth() - getPeriod(),
+        d.getDate()
+      ),
+      periodEnd: new Date(
+        d.getFullYear(),
+        d.getMonth() - getPeriod() + 1,
+        d.getDate() - 1
+      ),
     };
   }
 
@@ -51,13 +80,13 @@ const monthReducer = (state, action) => {
       startYear: state.startYear,
       periodStart: new Date(
         state.monthDate.getFullYear(),
-        state.monthDate.getMonth() - 1,
-        +action.day
+        state.monthDate.getMonth() - getPeriod(),
+        26
       ),
       periodEnd: new Date(
         state.monthDate.getFullYear(),
-        state.monthDate.getMonth(),
-        +action.day - 1
+        state.monthDate.getMonth() - getPeriod() + 1,
+        25
       ),
     };
   }

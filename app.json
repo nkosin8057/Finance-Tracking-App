@@ -4,7 +4,7 @@
     "slug": "FinanceTrackingApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/ic_launcher.png",
+    "icon": "",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "",
@@ -21,7 +21,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "",
+        "foregroundImage": "./assets/images/adapIcon.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.nkosin.FinanceTrackingApp",

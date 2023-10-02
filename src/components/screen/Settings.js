@@ -40,7 +40,7 @@ export const Settings = () => {
   };
 
   const onSelectDayHandler = (selection) => {
-    currencyCtx.setCurrencyCode(currencyData[selection].code);
+    //currencyCtx.setCurrencyCode(currencyData[selection].code);
   };
 
   return (

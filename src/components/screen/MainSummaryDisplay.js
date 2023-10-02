@@ -60,7 +60,7 @@ export const MainSummaryDisplay = ({ navigation }) => {
     );
     setLoading(false);
   };
-
+  console.log(monthCtx.periodStart);
   const fetchDataHandler = async () => {
     const q = query(
       dbRef,
