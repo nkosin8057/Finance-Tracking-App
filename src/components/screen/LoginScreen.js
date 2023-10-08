@@ -9,6 +9,7 @@ import {
 import { TextInput, SegmentedButtons, Button } from "react-native-paper";
 import { useState } from "react";
 import { auth } from "../../../firebaseConfig";
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

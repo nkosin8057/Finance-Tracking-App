@@ -46,7 +46,7 @@ export const Settings = () => {
   return (
     <View style={styles.container}>
       <View style={styles.secondContainer}>
-        <Text style={styles.title}>SETTINGS</Text>
+        <Text style={styles.title}>SETTING</Text>
         <View style={styles.item}>
           <Text style={styles.itemText}>Currency:</Text>
           <SelectList

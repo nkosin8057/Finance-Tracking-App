@@ -1,4 +1,4 @@
-import { DataTable } from "react-native-paper";
+import DataTable from "react-native-paper";
 import {
   StyleSheet,
   View,
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   table: {
-    flex: 0.9,
+    flex: 1,
   },
   image: {
     flex: 1,

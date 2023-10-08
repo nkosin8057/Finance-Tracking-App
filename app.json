@@ -14,7 +14,9 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.nkosin.FinanceTrackingApp"
@@ -34,6 +36,9 @@
       "eas": {
         "projectId": "91357aa7-a91d-42e6-825e-264a704a6456"
       }
-    }
+    },
+    "plugins": [
+      "expo-localization"
+    ]
   }
 }
